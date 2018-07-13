@@ -2,8 +2,6 @@ import React, { Component } from 'react';
 import { Typography, Divider, Icon } from '@material-ui/core';
 import { withStyles } from '@material-ui/core/styles';
 
-
-
 class RecipePage extends Component {
   render() {
     const { classes } = this.props;
@@ -14,7 +12,7 @@ class RecipePage extends Component {
             Tacos
           </Typography>
 
-          <Divider />
+          <Divider className={classes.titleDivider} />
 
           <div className={classes.subtitleContainer}>
             <div className={classes.timeAndServicesContainer}>
@@ -24,9 +22,9 @@ class RecipePage extends Component {
               </div>
 
               <div>
-                <Icon>add</Icon>
-                <Icon>people_outline</Icon>
-                <Icon>remove</Icon>
+                <Icon className={classes.icon}>add</Icon>
+                <Icon className={classes.icon}>people_outline</Icon>
+                <Icon className={classes.icon}>remove</Icon>
               </div>
             </div>
 
@@ -36,43 +34,55 @@ class RecipePage extends Component {
             </div>
           </div>
 
-          <div className={classes.ingredients}>
-            <Typography variant="title">Ingredients</Typography>
-            <div>
-              <Typography>1 head of Cauliflower</Typography>
-              <Typography>12 Corn tortillas</Typography>
-              <Typography>2 cups of rice</Typography>
-              <Typography>2.5 limes</Typography>
-              <Typography>1 bunch of cilantro</Typography>
-              <Typography>2 Jalapenos</Typography>
-              <Typography>Tomatillo salsa</Typography>
-              <Typography>Onion powder</Typography>
+          <div className={classes.contentsContainer}>
+            <div className={classes.ingredients}>
+              <Typography variant="title" gutterBottom>
+                Ingredients
+              </Typography>
+              <div>
+                {[
+                  '1 head of Cauliflower',
+                  '12 Corn tortillas',
+                  '2 cups of rice',
+                  '2.5 limes',
+                  '1 bunch of cilantro',
+                  '2 Jalapenos',
+                  'Tomatillo salsa',
+                  'Onion powder'
+                ].map(ingredient => (
+                  <Typography key={ingredient} className={classes.ingredient}>
+                    {ingredient}
+                  </Typography>
+                ))}
+              </div>
             </div>
-          </div>
 
-          <div className={classes.directions}>
-            <Typography variant="title">Directions</Typography>
-            <div className={classes.directionsList}>
-              {`Marinate the cauliflower. Cut up cauliflower and marinate with olive oil (enough to coat it on the outside) then add chipotle powder, onion powder, a whole lime and salt and pepper. Let it marinade for as much time as you have or while you perepare the rest.
+            <div className={classes.directions}>
+              <Typography variant="title" gutterBottom>
+                Directions
+              </Typography>
+              <div className={classes.directionsList}>
+                {`Marinate the cauliflower. Cut up cauliflower and marinate with olive oil (enough to coat it on the outside) then add chipotle powder, onion powder, a whole lime and salt and pepper. Let it marinade for as much time as you have or while you perepare the rest.
                 Roast the cauliflower in the oven at 425℉ for 35-45min checking on it periodically.
                 Start boiling water for the next step.
                 After twenty minutes of roasting the cauliflower add your corn to boiling water and let it cook for 15 minutes.
                 Immediately after putting the corn on start making cilantro lime rice.
                 Once the rice and corn is done, check on your cauliflower.
                 Serve on your tortillas and garnish with cilantro, jalapenos (fresh or pickled), onions and lime`
-                .split('\n')
-                .map((step, index) => (
-                  <div key={step} className={classes.directionStep}>
-                    <Typography className={classes.directionNumber}>
-                      {index + 1}
-                    </Typography>
-                    <Typography className={classes.directionText}>
-                      {step}
-                    </Typography>
-                  </div>
-                ))}
+                  .split('\n')
+                  .map((step, index) => (
+                    <div key={step} className={classes.directionStep}>
+                      <Typography className={classes.directionNumber}>{index + 1}</Typography>
+                      <Typography className={classes.directionText}>{step}</Typography>
+                    </div>
+                  ))}
+              </div>
             </div>
           </div>
+        </div>
+
+        <div className={classes.imageContainer}>
+          <img className={classes.image} src="/IMG_3062.JPG" alt="recipe" />
         </div>
       </div>
     );
@@ -81,15 +91,29 @@ class RecipePage extends Component {
 
 const styles = theme => ({
   page: {
-    width: '100vw',
-    height: '100vh',
-    background: theme.palette.primary.main
+    display: 'flex',
+    position: 'relative',
+    zIndex: 1,
+    [theme.breakpoints.up('sm')]: {
+      minHeight: '100vh'
+    }
   },
   infoContainer: {
-    border: 'solid 1px red'
+    flex: 1,
+    padding: 50,
+    zIndex: 1,
+    [theme.breakpoints.down('sm')]: {
+      background: 'rgba(0,0,0,0.5)',
+      overflow: 'scroll'
+    }
   },
   title: {
     letterSpacing: 2.8
+  },
+  titleDivider: {
+    [theme.breakpoints.down('sm')]: {
+      background: 'rgba(255,255,255,0.12)'
+    }
   },
   subtitleContainer: {
     display: 'flex',
@@ -97,19 +121,23 @@ const styles = theme => ({
     flexWrap: 'wrap',
     padding: '20px 0'
   },
+  icon: {
+    display: 'inline-block'
+  },
   timeAndServicesContainer: {
     display: 'flex',
-    alignItems:'center',
-    flexShrink: 0,
-    marginRight: 40,
+    alignItems: 'center',
+    flexWrap: 'wrap',
+    marginRight: 40
   },
   timeContainer: {
     display: 'flex',
-    alignItems:'center'
+    alignItems: 'center',
+    flexWrap: 'wrap'
   },
   tagsContainer: {
     flexShrink: 0,
-    display:'flex',
+    display: 'flex'
   },
   chip: {
     border: 'solid 1px rgba(255, 255, 255,0.7)',
@@ -117,17 +145,56 @@ const styles = theme => ({
     marginRight: 10,
     borderRadius: 100
   },
+  ingredients: {
+    marginBottom: 40,
+    marginRight: 40,
+    flexShrink: 0
+  },
+  ingredient: {
+    marginBottom: 10
+  },
+  directions: {
+    flexGrow: 1,
+    flexBasis: 360
+  },
   directionsList: {},
   directionStep: {
     display: 'flex',
     marginBottom: 20
   },
   directionNumber: {
-    minWidth: 40,
+    minWidth: 28,
     display: 'inline'
   },
   directionText: {
     display: 'inline'
+  },
+  contentsContainer: {
+    display: 'flex',
+    flexWrap: 'wrap'
+  },
+  imageContainer: {
+    flex: 1,
+    padding: 50,
+    boxSizing: 'border-box',
+    alignSelf: 'flex-start',
+    height: '100vh',
+    [theme.breakpoints.down('sm')]: {
+      position: 'absolute',
+      top: 0,
+      left: 0,
+      width: '100%',
+      height: '100%',
+      background: 'rgba(0,0,0,0.7)',
+      padding: 0
+    }
+  },
+  image: {
+    objectFit: 'cover',
+    objectPosition: 'center',
+    width: '100%',
+    height: '100%',
+    display: 'block'
   }
 });
 
