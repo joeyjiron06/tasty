@@ -194,7 +194,11 @@ const styles = theme => ({
     objectPosition: 'center',
     width: '100%',
     height: '100%',
-    display: 'block'
+    display: 'block',
+    borderRadius: 10,
+    [theme.breakpoints.down('sm')]: {
+      borderRadius: 0
+    }
   }
 });
 
