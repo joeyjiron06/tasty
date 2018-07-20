@@ -17,13 +17,14 @@ class RecipePage extends Component {
           <div className={classes.subtitleContainer}>
             <div className={classes.timeAndServicesContainer}>
               <div className={classes.timeContainer}>
-                <Icon>access_time</Icon>
+                <Icon className={classes.icon}>access_time</Icon>
                 <div>1 hour</div>
               </div>
 
-              <div>
-                <Icon className={classes.icon}>add</Icon>
+              <div className={classes.servingsContainer}>
                 <Icon className={classes.icon}>people_outline</Icon>
+                <Icon className={classes.icon}>add</Icon>
+                <Typography className={classes.servingsText}>4</Typography>
                 <Icon className={classes.icon}>remove</Icon>
               </div>
             </div>
@@ -72,8 +73,12 @@ class RecipePage extends Component {
                   .split('\n')
                   .map((step, index) => (
                     <div key={step} className={classes.directionStep}>
-                      <Typography className={classes.directionNumber}>{index + 1}</Typography>
-                      <Typography className={classes.directionText}>{step}</Typography>
+                      <Typography className={classes.directionNumber}>
+                        {index + 1}
+                      </Typography>
+                      <Typography className={classes.directionText}>
+                        {step}
+                      </Typography>
                     </div>
                   ))}
               </div>
@@ -104,7 +109,9 @@ const styles = theme => ({
     zIndex: 1,
     [theme.breakpoints.down('sm')]: {
       background: 'rgba(0,0,0,0.5)',
-      overflow: 'scroll'
+      overflow: 'scroll',
+      height: '100vh',
+      boxSizing: 'border-box'
     }
   },
   title: {
@@ -122,7 +129,16 @@ const styles = theme => ({
     padding: '20px 0'
   },
   icon: {
-    display: 'inline-block'
+    display: 'inline-block',
+    marginRight: 10
+  },
+  servingsContainer: {
+    display: 'flex',
+    alignItems: 'center'
+  },
+  servingsText: {
+    display: 'inline-block',
+    marginRight: 10
   },
   timeAndServicesContainer: {
     display: 'flex',
@@ -133,7 +149,8 @@ const styles = theme => ({
   timeContainer: {
     display: 'flex',
     alignItems: 'center',
-    flexWrap: 'wrap'
+    flexWrap: 'wrap',
+    marginRight: 30
   },
   tagsContainer: {
     flexShrink: 0,
@@ -184,7 +201,6 @@ const styles = theme => ({
       top: 0,
       left: 0,
       width: '100%',
-      height: '100%',
       background: 'rgba(0,0,0,0.7)',
       padding: 0
     }
