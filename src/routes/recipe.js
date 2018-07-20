@@ -68,7 +68,6 @@ class RecipePage extends Component {
               onChange={this.handleTitleChanged}
               margin="normal"
               InputProps={{
-                disableUnderline: true,
                 classes: {
                   input: classes.titleInput
                 }
@@ -80,7 +79,7 @@ class RecipePage extends Component {
             </Typography>
           )}
 
-          <Divider className={classes.titleDivider} />
+          {isEditing ? null : <Divider className={classes.titleDivider} />}
 
           <div className={classes.subtitleContainer}>
             <div className={classes.timeAndServicesContainer}>
