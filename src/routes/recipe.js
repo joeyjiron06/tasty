@@ -1,16 +1,84 @@
 import React, { Component } from 'react';
-import { Typography, Divider, Icon } from '@material-ui/core';
+import { Typography, Divider, Icon, TextField } from '@material-ui/core';
 import { withStyles } from '@material-ui/core/styles';
 
 class RecipePage extends Component {
+  state = {
+    isEditing: true,
+    recipe: {
+      title: 'Tacos',
+      duration: {
+        value: 1,
+        unit: 'hour'
+      },
+      serves: 4,
+      tags: ['Vegan', 'Breakfast'],
+      ingredients: [
+        '1 head of Cauliflower',
+        '12 Corn tortillas',
+        '2 cups of rice',
+        '2.5 limes',
+        '1 bunch of cilantro',
+        '2 Jalapenos',
+        'Tomatillo salsa',
+        'Onion powder'
+      ],
+      directions: [
+        'Marinate the cauliflower. Cut up cauliflower and marinate with olive oil (enough to coat it on the outside) then add chipotle powder, onion powder, a whole lime and salt and pepper. Let it marinade for as much time as you have or while you perepare the rest.',
+        'Roast the cauliflower in the oven at 425℉ for 35-45min checking on it periodically.',
+        'Start boiling water for the next step.',
+        'After twenty minutes of roasting the cauliflower add your corn to boiling water and let it cook for 15 minutes.',
+        'Immediately after putting the corn on start making cilantro lime rice.',
+        'Once the rice and corn is done, check on your cauliflower.',
+        'Serve on your tortillas and garnish with cilantro, jalapenos (fresh or pickled), onions and lime'
+      ]
+    }
+  };
+
+  handleTitleChanged = event => {
+    const title = event.target.value;
+    const editRecipe = { ...this.state.editRecipe, title };
+    this.setState({ editRecipe });
+  };
+
+  UNSAFE_componentWillMount() {
+    this.setState({
+      editRecipe: {
+        ...this.state.recipe,
+        duration: {
+          ...this.state.recipe.duration
+        },
+        tags: [...this.state.recipe.tags],
+        ingredients: [...this.state.recipe.ingredients],
+        directions: [...this.state.recipe.directions]
+      }
+    });
+  }
+
   render() {
     const { classes } = this.props;
+    const { isEditing, recipe, editRecipe } = this.state;
     return (
       <div className={classes.page}>
         <div className={classes.infoContainer}>
-          <Typography variant="display3" className={classes.title}>
-            Tacos
-          </Typography>
+          {isEditing ? (
+            <TextField
+              value={editRecipe.title || ''}
+              fullWidth={true}
+              onChange={this.handleTitleChanged}
+              margin="normal"
+              InputProps={{
+                disableUnderline: true,
+                classes: {
+                  input: classes.titleInput
+                }
+              }}
+            />
+          ) : (
+            <Typography variant="display3" className={classes.title}>
+              {recipe.title}
+            </Typography>
+          )}
 
           <Divider className={classes.titleDivider} />
 
@@ -18,20 +86,25 @@ class RecipePage extends Component {
             <div className={classes.timeAndServicesContainer}>
               <div className={classes.timeContainer}>
                 <Icon className={classes.icon}>access_time</Icon>
-                <div>1 hour</div>
+                <div>{`${recipe.duration.value} ${recipe.duration.unit}`}</div>
               </div>
 
               <div className={classes.servingsContainer}>
                 <Icon className={classes.icon}>people_outline</Icon>
                 <Icon className={classes.icon}>add</Icon>
-                <Typography className={classes.servingsText}>4</Typography>
+                <Typography className={classes.servingsText}>
+                  {recipe.serves}
+                </Typography>
                 <Icon className={classes.icon}>remove</Icon>
               </div>
             </div>
 
             <div className={classes.tagsContainer}>
-              <div className={classes.chip}>Vegan</div>
-              <div className={classes.chip}> Breakfast</div>
+              {recipe.tags.map(tag => (
+                <div key={tag} className={classes.chip}>
+                  {tag}
+                </div>
+              ))}
             </div>
           </div>
 
@@ -41,16 +114,7 @@ class RecipePage extends Component {
                 Ingredients
               </Typography>
               <div>
-                {[
-                  '1 head of Cauliflower',
-                  '12 Corn tortillas',
-                  '2 cups of rice',
-                  '2.5 limes',
-                  '1 bunch of cilantro',
-                  '2 Jalapenos',
-                  'Tomatillo salsa',
-                  'Onion powder'
-                ].map(ingredient => (
+                {recipe.ingredients.map(ingredient => (
                   <Typography key={ingredient} className={classes.ingredient}>
                     {ingredient}
                   </Typography>
@@ -63,24 +127,16 @@ class RecipePage extends Component {
                 Directions
               </Typography>
               <div className={classes.directionsList}>
-                {`Marinate the cauliflower. Cut up cauliflower and marinate with olive oil (enough to coat it on the outside) then add chipotle powder, onion powder, a whole lime and salt and pepper. Let it marinade for as much time as you have or while you perepare the rest.
-                Roast the cauliflower in the oven at 425℉ for 35-45min checking on it periodically.
-                Start boiling water for the next step.
-                After twenty minutes of roasting the cauliflower add your corn to boiling water and let it cook for 15 minutes.
-                Immediately after putting the corn on start making cilantro lime rice.
-                Once the rice and corn is done, check on your cauliflower.
-                Serve on your tortillas and garnish with cilantro, jalapenos (fresh or pickled), onions and lime`
-                  .split('\n')
-                  .map((step, index) => (
-                    <div key={step} className={classes.directionStep}>
-                      <Typography className={classes.directionNumber}>
-                        {index + 1}
-                      </Typography>
-                      <Typography className={classes.directionText}>
-                        {step}
-                      </Typography>
-                    </div>
-                  ))}
+                {recipe.directions.map((step, index) => (
+                  <div key={step} className={classes.directionStep}>
+                    <Typography className={classes.directionNumber}>
+                      {index + 1}
+                    </Typography>
+                    <Typography className={classes.directionText}>
+                      {step}
+                    </Typography>
+                  </div>
+                ))}
               </div>
             </div>
           </div>
@@ -116,6 +172,10 @@ const styles = theme => ({
   },
   title: {
     letterSpacing: 2.8
+  },
+  titleInput: {
+    color: theme.typography.title.color,
+    fontSize: theme.typography.title.fontSize
   },
   titleDivider: {
     [theme.breakpoints.down('sm')]: {
