@@ -1,5 +1,11 @@
 import React, { Component } from 'react';
-import { Typography, Divider, Icon, TextField } from '@material-ui/core';
+import {
+  Typography,
+  Divider,
+  Icon,
+  TextField,
+  Button
+} from '@material-ui/core';
 import { withStyles } from '@material-ui/core/styles';
 
 class RecipePage extends Component {
@@ -40,6 +46,21 @@ class RecipePage extends Component {
     const editRecipe = { ...this.state.editRecipe, title };
     this.setState({ editRecipe });
   };
+  handleCancelClicked = event => {
+    this.setState({
+      isEditing: false
+    });
+  };
+  handleSaveClicked = event => {
+    this.setState({
+      isEditing: false
+    });
+  };
+  handleEditClicked = event => {
+    this.setState({
+      isEditing: true
+    });
+  };
 
   UNSAFE_componentWillMount() {
     this.setState({
@@ -60,6 +81,39 @@ class RecipePage extends Component {
     const { isEditing, recipe, editRecipe } = this.state;
     return (
       <div className={classes.page}>
+        <div className={classes.editContainer}>
+          {isEditing ? (
+            <div>
+              <Button
+                variant="contained"
+                color="default"
+                className={classes.cancelButton}
+                onClick={this.handleCancelClicked}
+              >
+                <Icon className={classes.buttonIcon}>close</Icon>
+                Cancel
+              </Button>
+              <Button
+                variant="contained"
+                color="secondary"
+                onClick={this.handleSaveClicked}
+              >
+                <Icon className={classes.buttonIcon}>check</Icon>
+                Save
+              </Button>
+            </div>
+          ) : (
+            <Button
+              variant="contained"
+              color="secondary"
+              onClick={this.handleEditClicked}
+            >
+              <Icon className={classes.buttonIcon}>edit</Icon>
+              Edit
+            </Button>
+          )}
+        </div>
+
         <div className={classes.infoContainer}>
           {isEditing ? (
             <TextField
@@ -158,6 +212,19 @@ const styles = theme => ({
       minHeight: '100vh'
     }
   },
+  editContainer: {
+    display: 'flex',
+    justifyContent: 'flex-end',
+    position: 'absolute',
+    width: '100%',
+    paddingRight: 20
+  },
+  buttonIcon: {
+    marginRight: 10
+  },
+  cancelButton: {
+    marginRight: 10
+  },
   infoContainer: {
     flex: 1,
     padding: 50,
@@ -173,8 +240,8 @@ const styles = theme => ({
     letterSpacing: 2.8
   },
   titleInput: {
-    color: theme.typography.title.color,
-    fontSize: theme.typography.title.fontSize
+    color: theme.typography.display3.color,
+    fontSize: theme.typography.display3.fontSize
   },
   titleDivider: {
     [theme.breakpoints.down('sm')]: {
