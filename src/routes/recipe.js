@@ -8,6 +8,16 @@ import {
 } from '@material-ui/core';
 import { withStyles } from '@material-ui/core/styles';
 
+const copyRecipe = recipe => ({
+  ...recipe,
+  duration: {
+    ...recipe.duration
+  },
+  tags: [...recipe.tags],
+  ingredients: [...recipe.ingredients],
+  directions: [...recipe.directions]
+});
+
 class RecipePage extends Component {
   state = {
     isEditing: true,
@@ -57,9 +67,36 @@ class RecipePage extends Component {
     });
   };
   handleEditClicked = event => {
+    const editRecipe = copyRecipe(this.state.recipe);
     this.setState({
-      isEditing: true
+      isEditing: true,
+      editRecipe
     });
+  };
+  handleDurationValueChanged = event => {
+    const text = event.target.value;
+    const number = text && parseInt(text);
+
+    if (number === undefined) {
+      return;
+    }
+
+    if (number === null) {
+      return;
+    }
+
+    if (isNaN(number)) {
+      return;
+    }
+
+    const editRecipe = {
+      ...this.state.editRecipe,
+      duration: {
+        ...this.state.editRecipe.duration,
+        value: number
+      }
+    };
+    this.setState({ editRecipe });
   };
 
   UNSAFE_componentWillMount() {
@@ -139,7 +176,25 @@ class RecipePage extends Component {
             <div className={classes.timeAndServicesContainer}>
               <div className={classes.timeContainer}>
                 <Icon className={classes.icon}>access_time</Icon>
-                <div>{`${recipe.duration.value} ${recipe.duration.unit}`}</div>
+                {isEditing ? (
+                  <div className={classes.timeInputContainer}>
+                    <TextField
+                      value={editRecipe.duration.value || ''}
+                      onChange={this.handleDurationValueChanged}
+                      margin="normal"
+                      InputProps={{
+                        classes: {
+                          input: classes.durationValueInput
+                        }
+                      }}
+                    />
+                    <div>mins</div>
+                  </div>
+                ) : (
+                  <div>{`${recipe.duration.value} ${
+                    recipe.duration.unit
+                  }`}</div>
+                )}
               </div>
 
               <div className={classes.servingsContainer}>
@@ -257,6 +312,13 @@ const styles = theme => ({
   icon: {
     display: 'inline-block',
     marginRight: 10
+  },
+  timeInputContainer: {
+    display: 'flex',
+    alignItems: 'flex-end'
+  },
+  durationValueInput: {
+    maxWidth: 30
   },
   servingsContainer: {
     display: 'flex',
