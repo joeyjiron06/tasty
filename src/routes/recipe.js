@@ -145,6 +145,21 @@ class RecipePage extends Component {
     this.setState({ editRecipe });
   };
 
+  handleStepTextChanged = (step, index) => event => {
+    const newText = event.target.value;
+    const editRecipe = {
+      ...this.state.editRecipe,
+      directions: this.state.editRecipe.directions.map((dir, idx) => {
+        if (idx === index) {
+          return newText;
+        }
+
+        return dir;
+      })
+    };
+    this.setState({ editRecipe });
+  };
+
   UNSAFE_componentWillMount() {
     this.setState({
       editRecipe: {
@@ -349,7 +364,7 @@ class RecipePage extends Component {
               <div className={classes.directionsList}>
                 {isEditing
                   ? editRecipe.directions.map((step, index) => (
-                      <div key={step} className={classes.directionStep}>
+                      <div key={index} className={classes.directionStep}>
                         <IconButton onClick={this.handleRemoveStep(step)}>
                           <Icon>cancel</Icon>
                         </IconButton>
@@ -357,9 +372,13 @@ class RecipePage extends Component {
                         <Typography className={classes.directionNumberEditing}>
                           {index + 1}
                         </Typography>
-                        <Typography className={classes.directionTextEditing}>
-                          {step}
-                        </Typography>
+                        <TextField
+                          className={classes.directionTextEditing}
+                          fullWidth={true}
+                          multiline={true}
+                          value={step}
+                          onChange={this.handleStepTextChanged(step, index)}
+                        />
                       </div>
                     ))
                   : recipe.directions.map((step, index) => (
@@ -533,7 +552,8 @@ const styles = theme => ({
   },
   directionTextEditing: {
     display: 'inline',
-    marginTop: 10
+    marginTop: 10,
+    flexGrow: 1
   },
   contentsContainer: {
     display: 'flex',
