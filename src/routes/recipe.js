@@ -287,6 +287,7 @@ class RecipePage extends Component {
               {isEditing
                 ? editRecipe.tags.map(tag => (
                     <Chip
+                      className={classes.chipEditing}
                       key={tag}
                       onDelete={this.handleDeleteTag(tag)}
                       label={tag}
@@ -514,6 +515,9 @@ const styles = theme => ({
     padding: '10px 14px',
     marginRight: 10,
     borderRadius: 100
+  },
+  chipEditing: {
+    marginRight: 10
   },
   ingredients: {
     marginBottom: 40,
