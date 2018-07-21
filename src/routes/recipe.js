@@ -4,7 +4,9 @@ import {
   Divider,
   Icon,
   TextField,
-  Button
+  Button,
+  IconButton,
+  Chip
 } from '@material-ui/core';
 import { withStyles } from '@material-ui/core/styles';
 
@@ -99,6 +101,50 @@ class RecipePage extends Component {
     this.setState({ editRecipe });
   };
 
+  handleServesChanged = event => {
+    const serves = event.target.value;
+    const editRecipe = {
+      ...this.state.editRecipe,
+      serves
+    };
+    this.setState({
+      editRecipe
+    });
+  };
+
+  handleRemoveIngredient = ingredient => {
+    return () => {
+      const editRecipe = {
+        ...this.state.editRecipe,
+        ingredients: this.state.editRecipe.ingredients.filter(
+          ing => ing !== ingredient
+        )
+      };
+      this.setState({ editRecipe });
+    };
+  };
+  handleRemoveStep = step => () => {
+    const editRecipe = {
+      ...this.state.editRecipe,
+      directions: this.state.editRecipe.directions.filter(stp => stp !== step)
+    };
+    this.setState({ editRecipe });
+  };
+  handleAddIngredient = () => {
+    console.log('add ingredient');
+  };
+  handleAddStep = () => {
+    console.log('add step');
+  };
+
+  handleDeleteTag = tag => () => {
+    const editRecipe = {
+      ...this.state.editRecipe,
+      tags: this.state.editRecipe.tags.filter(t => t !== tag)
+    };
+    this.setState({ editRecipe });
+  };
+
   UNSAFE_componentWillMount() {
     this.setState({
       editRecipe: {
@@ -188,7 +234,7 @@ class RecipePage extends Component {
                         }
                       }}
                     />
-                    <div>mins</div>
+                    <div className={classes.timeLabel}>mins</div>
                   </div>
                 ) : (
                   <div>{`${recipe.duration.value} ${
@@ -200,51 +246,143 @@ class RecipePage extends Component {
               <div className={classes.servingsContainer}>
                 <Icon className={classes.icon}>people_outline</Icon>
                 <Icon className={classes.icon}>add</Icon>
-                <Typography className={classes.servingsText}>
-                  {recipe.serves}
-                </Typography>
+
+                {isEditing ? (
+                  <TextField
+                    value={editRecipe.serves || ''}
+                    onChange={this.handleServesChanged}
+                    margin="normal"
+                    InputProps={{
+                      classes: {
+                        input: classes.servesInput
+                      }
+                    }}
+                  />
+                ) : (
+                  <Typography className={classes.servingsText}>
+                    {recipe.serves}
+                  </Typography>
+                )}
+
                 <Icon className={classes.icon}>remove</Icon>
               </div>
             </div>
 
             <div className={classes.tagsContainer}>
-              {recipe.tags.map(tag => (
-                <div key={tag} className={classes.chip}>
-                  {tag}
-                </div>
-              ))}
+              {isEditing
+                ? editRecipe.tags.map(tag => (
+                    <Chip
+                      key={tag}
+                      onDelete={this.handleDeleteTag(tag)}
+                      label={tag}
+                    />
+                  ))
+                : recipe.tags.map(tag => (
+                    <div key={tag} className={classes.chip}>
+                      {tag}
+                    </div>
+                  ))}
+
+              {isEditing ? (
+                <Button color="secondary" variant="contained">
+                  <Icon className={classes.buttonIcon}>add</Icon>
+                  Add tag
+                </Button>
+              ) : null}
             </div>
           </div>
 
           <div className={classes.contentsContainer}>
             <div className={classes.ingredients}>
-              <Typography variant="title" gutterBottom>
+              <Typography
+                variant="title"
+                gutterBottom
+                className={isEditing ? classes.ingredientsTitleEditing : null}
+              >
                 Ingredients
               </Typography>
               <div>
-                {recipe.ingredients.map(ingredient => (
-                  <Typography key={ingredient} className={classes.ingredient}>
-                    {ingredient}
-                  </Typography>
-                ))}
+                {isEditing
+                  ? editRecipe.ingredients.map(ingredient => (
+                      <Typography
+                        key={ingredient}
+                        className={classes.ingredient}
+                      >
+                        <IconButton
+                          onClick={this.handleRemoveIngredient(ingredient)}
+                        >
+                          <Icon>cancel</Icon>
+                        </IconButton>
+                        {ingredient}
+                      </Typography>
+                    ))
+                  : recipe.ingredients.map(ingredient => (
+                      <Typography
+                        key={ingredient}
+                        className={classes.ingredient}
+                      >
+                        {ingredient}
+                      </Typography>
+                    ))}
+
+                {isEditing ? (
+                  <Button
+                    color="secondary"
+                    variant="contained"
+                    onClick={this.handleAddIngredient}
+                  >
+                    <Icon className={classes.buttonIcon}>add</Icon>
+                    Add Ingredient
+                  </Button>
+                ) : null}
               </div>
             </div>
 
             <div className={classes.directions}>
-              <Typography variant="title" gutterBottom>
+              <Typography
+                variant="title"
+                gutterBottom
+                className={isEditing ? classes.directionsTitleEditing : null}
+              >
                 Directions
               </Typography>
               <div className={classes.directionsList}>
-                {recipe.directions.map((step, index) => (
-                  <div key={step} className={classes.directionStep}>
-                    <Typography className={classes.directionNumber}>
-                      {index + 1}
-                    </Typography>
-                    <Typography className={classes.directionText}>
-                      {step}
-                    </Typography>
-                  </div>
-                ))}
+                {isEditing
+                  ? editRecipe.directions.map((step, index) => (
+                      <div key={step} className={classes.directionStep}>
+                        <IconButton onClick={this.handleRemoveStep(step)}>
+                          <Icon>cancel</Icon>
+                        </IconButton>
+
+                        <Typography className={classes.directionNumberEditing}>
+                          {index + 1}
+                        </Typography>
+                        <Typography className={classes.directionTextEditing}>
+                          {step}
+                        </Typography>
+                      </div>
+                    ))
+                  : recipe.directions.map((step, index) => (
+                      <div key={step} className={classes.directionStep}>
+                        <Typography className={classes.directionNumber}>
+                          {index + 1}
+                        </Typography>
+                        <Typography className={classes.directionText}>
+                          {step}
+                        </Typography>
+                      </div>
+                    ))}
+
+                {isEditing ? (
+                  <Button
+                    color="secondary"
+                    variant="contained"
+                    onClick={this.handleAddStep}
+                  >
+                    <Icon className={classes.buttonIcon}>add</Icon>
+                    Add Step
+                  </Button>
+                ) : null}
               </div>
             </div>
           </div>
@@ -272,7 +410,8 @@ const styles = theme => ({
     justifyContent: 'flex-end',
     position: 'absolute',
     width: '100%',
-    paddingRight: 20
+    paddingRight: 20,
+    zIndex: 2
   },
   buttonIcon: {
     marginRight: 10
@@ -298,10 +437,17 @@ const styles = theme => ({
     color: theme.typography.display3.color,
     fontSize: theme.typography.display3.fontSize
   },
+  timeLabel: {
+    marginLeft: 10,
+    marginBottom: 4
+  },
   titleDivider: {
     [theme.breakpoints.down('sm')]: {
       background: 'rgba(255,255,255,0.12)'
     }
+  },
+  servesInput: {
+    maxWidth: 30
   },
   subtitleContainer: {
     display: 'flex',
@@ -355,12 +501,18 @@ const styles = theme => ({
     marginRight: 40,
     flexShrink: 0
   },
+  ingredientsTitleEditing: {
+    marginLeft: 48
+  },
   ingredient: {
     marginBottom: 10
   },
   directions: {
     flexGrow: 1,
     flexBasis: 360
+  },
+  directionsTitleEditing: {
+    marginLeft: 48
   },
   directionsList: {},
   directionStep: {
@@ -371,8 +523,17 @@ const styles = theme => ({
     minWidth: 28,
     display: 'inline'
   },
+  directionNumberEditing: {
+    minWidth: 28,
+    display: 'inline',
+    marginTop: 10
+  },
   directionText: {
     display: 'inline'
+  },
+  directionTextEditing: {
+    display: 'inline',
+    marginTop: 10
   },
   contentsContainer: {
     display: 'flex',
