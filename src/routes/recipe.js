@@ -147,16 +147,15 @@ class RecipePage extends Component {
 
   handleStepTextChanged = (step, index) => event => {
     const newText = event.target.value;
-    const editRecipe = {
-      ...this.state.editRecipe,
-      directions: this.state.editRecipe.directions.map((dir, idx) => {
-        if (idx === index) {
-          return newText;
-        }
+    const editRecipe = this.state.editRecipe;
+    editRecipe.directions[index] = newText;
+    this.setState({ editRecipe });
+  };
 
-        return dir;
-      })
-    };
+  handleIngredientChanged = (ingredient, index) => event => {
+    const newText = event.target.value;
+    const editRecipe = this.state.editRecipe;
+    editRecipe.ingredients[index] = newText;
     this.setState({ editRecipe });
   };
 
@@ -319,18 +318,32 @@ class RecipePage extends Component {
               </Typography>
               <div>
                 {isEditing
-                  ? editRecipe.ingredients.map(ingredient => (
-                      <Typography
-                        key={ingredient}
-                        className={classes.ingredient}
+                  ? editRecipe.ingredients.map((ingredient, index) => (
+                      <div
+                        key={index}
+                        className={classes.editIngredientContainer}
                       >
-                        <IconButton
-                          onClick={this.handleRemoveIngredient(ingredient)}
-                        >
-                          <Icon>cancel</Icon>
-                        </IconButton>
-                        {ingredient}
-                      </Typography>
+                        <Typography className={classes.ingredient}>
+                          <IconButton
+                            onClick={this.handleRemoveIngredient(ingredient)}
+                          >
+                            <Icon>cancel</Icon>
+                          </IconButton>
+                        </Typography>
+                        <TextField
+                          value={ingredient || ''}
+                          onChange={this.handleIngredientChanged(
+                            ingredient,
+                            index
+                          )}
+                          margin="normal"
+                          InputProps={{
+                            classes: {
+                              input: classes.ingredientInput
+                            }
+                          }}
+                        />
+                      </div>
                     ))
                   : recipe.ingredients.map(ingredient => (
                       <Typography
@@ -523,6 +536,10 @@ const styles = theme => ({
     marginBottom: 40,
     marginRight: 40,
     flexShrink: 0
+  },
+  editIngredientContainer: {
+    display: 'flex',
+    alignItems: 'center'
   },
   ingredientsTitleEditing: {
     marginLeft: 48
