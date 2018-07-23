@@ -25,6 +25,7 @@ class RecipePage extends Component {
     isEditing: true,
     recipe: {
       title: 'Tacos',
+      image: '/IMG_3062.JPG',
       duration: {
         value: 1,
         unit: 'hour'
@@ -159,6 +160,13 @@ class RecipePage extends Component {
     this.setState({ editRecipe });
   };
 
+  handleImageChanged = event => {
+    const image = event.target.value;
+    const editRecipe = this.state.editRecipe;
+    editRecipe.image = image;
+    this.setState({ editRecipe });
+  };
+
   UNSAFE_componentWillMount() {
     this.setState({
       editRecipe: {
@@ -259,8 +267,6 @@ class RecipePage extends Component {
 
               <div className={classes.servingsContainer}>
                 <Icon className={classes.icon}>people_outline</Icon>
-                <Icon className={classes.icon}>add</Icon>
-
                 {isEditing ? (
                   <TextField
                     value={editRecipe.serves || ''}
@@ -277,8 +283,6 @@ class RecipePage extends Component {
                     {recipe.serves}
                   </Typography>
                 )}
-
-                <Icon className={classes.icon}>remove</Icon>
               </div>
             </div>
 
@@ -422,7 +426,21 @@ class RecipePage extends Component {
         </div>
 
         <div className={classes.imageContainer}>
-          <img className={classes.image} src="/IMG_3062.JPG" alt="recipe" />
+          <img
+            className={classes.image}
+            src={isEditing ? editRecipe.image : recipe.image}
+            alt="recipe"
+          />
+          {isEditing ? (
+            <div className={classes.imageUrl}>
+              <TextField
+                label="Image"
+                fullWidth={true}
+                value={editRecipe.image}
+                onChange={this.handleImageChanged}
+              />
+            </div>
+          ) : null}
         </div>
       </div>
     );
@@ -586,6 +604,7 @@ const styles = theme => ({
     boxSizing: 'border-box',
     alignSelf: 'flex-start',
     height: '100vh',
+    position:'relative',
     [theme.breakpoints.down('sm')]: {
       position: 'absolute',
       top: 0,
@@ -604,6 +623,15 @@ const styles = theme => ({
     borderRadius: 10,
     [theme.breakpoints.down('sm')]: {
       borderRadius: 0
+    }
+  },
+  imageUrl: {
+    position: 'absolute',
+    left: 40,
+    bottom: 0,
+    zIndex: 20,
+    [theme.breakpoints.down('sm')]: {
+    bottom: 20,
     }
   }
 });
