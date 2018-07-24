@@ -6,15 +6,14 @@ import {
   TextField,
   Button,
   IconButton,
-  Chip
+  Chip,
+  CircularProgress
 } from '@material-ui/core';
 import { withStyles } from '@material-ui/core/styles';
+import { database } from 'firebase';
 
 const copyRecipe = recipe => ({
   ...recipe,
-  duration: {
-    ...recipe.duration
-  },
   tags: [...recipe.tags],
   ingredients: [...recipe.ingredients],
   directions: [...recipe.directions]
@@ -22,36 +21,11 @@ const copyRecipe = recipe => ({
 
 class RecipePage extends Component {
   state = {
-    isEditing: true,
-    recipe: {
-      title: 'Tacos',
-      image: '/IMG_3062.JPG',
-      duration: {
-        value: 1,
-        unit: 'hour'
-      },
-      serves: 4,
-      tags: ['Vegan', 'Breakfast'],
-      ingredients: [
-        '1 head of Cauliflower',
-        '12 Corn tortillas',
-        '2 cups of rice',
-        '2.5 limes',
-        '1 bunch of cilantro',
-        '2 Jalapenos',
-        'Tomatillo salsa',
-        'Onion powder'
-      ],
-      directions: [
-        'Marinate the cauliflower. Cut up cauliflower and marinate with olive oil (enough to coat it on the outside) then add chipotle powder, onion powder, a whole lime and salt and pepper. Let it marinade for as much time as you have or while you perepare the rest.',
-        'Roast the cauliflower in the oven at 425℉ for 35-45min checking on it periodically.',
-        'Start boiling water for the next step.',
-        'After twenty minutes of roasting the cauliflower add your corn to boiling water and let it cook for 15 minutes.',
-        'Immediately after putting the corn on start making cilantro lime rice.',
-        'Once the rice and corn is done, check on your cauliflower.',
-        'Serve on your tortillas and garnish with cilantro, jalapenos (fresh or pickled), onions and lime'
-      ]
-    }
+    isLoading: true,
+    isEditing: false,
+    isError: false,
+    recipe: null,
+    editRecipe: null
   };
 
   handleTitleChanged = event => {
@@ -64,11 +38,29 @@ class RecipePage extends Component {
       isEditing: false
     });
   };
-  handleSaveClicked = event => {
+  handleSaveClicked = async event => {
+    const recipe = copyRecipe(this.state.editRecipe);
+    const recipeId = this.props.match.params.id;
+
+    recipe.ingredients = recipe.ingredients.filter(ing => !!ing);
+    recipe.directions = recipe.directions.filter(dir => !!dir);
+    recipe.tags = recipe.tags.filter(tag => !!tag);
+
+    try {
+      await database()
+        .ref('recipes')
+        .child(recipeId)
+        .set(recipe);
+    } catch (e) {
+      console.error(e);
+    }
+
     this.setState({
-      isEditing: false
+      isEditing: false,
+      recipe
     });
   };
+
   handleEditClicked = event => {
     const editRecipe = copyRecipe(this.state.recipe);
     this.setState({
@@ -93,12 +85,9 @@ class RecipePage extends Component {
     }
 
     const editRecipe = {
-      ...this.state.editRecipe,
-      duration: {
-        ...this.state.editRecipe.duration,
-        value: number
-      }
+      ...this.state.editRecipe
     };
+    editRecipe.duration = number;
     this.setState({ editRecipe });
   };
 
@@ -132,17 +121,34 @@ class RecipePage extends Component {
     this.setState({ editRecipe });
   };
   handleAddIngredient = () => {
-    console.log('add ingredient');
+    const editRecipe = {
+      ...this.state.editRecipe
+    };
+    editRecipe.ingredients.push(null);
+    this.setState({ editRecipe });
   };
   handleAddStep = () => {
-    console.log('add step');
+    const editRecipe = {
+      ...this.state.editRecipe
+    };
+    editRecipe.directions.push(null);
+    this.setState({ editRecipe });
   };
 
-  handleDeleteTag = tag => () => {
+  handleDeleteTag = index => () => {
     const editRecipe = {
       ...this.state.editRecipe,
-      tags: this.state.editRecipe.tags.filter(t => t !== tag)
+      tags: this.state.editRecipe.tags.filter((t, idx) => index !== idx)
     };
+    this.setState({ editRecipe });
+  };
+
+  handleTagChanged = index => event => {
+    const text = event.target.value;
+    const editRecipe = {
+      ...this.state.editRecipe
+    };
+    editRecipe.tags[index] = text;
     this.setState({ editRecipe });
   };
 
@@ -159,6 +165,13 @@ class RecipePage extends Component {
     editRecipe.ingredients[index] = newText;
     this.setState({ editRecipe });
   };
+  handleAddTag = event => {
+    const editRecipe = {
+      ...this.state.editRecipe
+    };
+    editRecipe.tags.push(null);
+    this.setState({ editRecipe });
+  };
 
   handleImageChanged = event => {
     const image = event.target.value;
@@ -167,23 +180,76 @@ class RecipePage extends Component {
     this.setState({ editRecipe });
   };
 
-  UNSAFE_componentWillMount() {
-    this.setState({
-      editRecipe: {
-        ...this.state.recipe,
-        duration: {
-          ...this.state.recipe.duration
-        },
-        tags: [...this.state.recipe.tags],
-        ingredients: [...this.state.recipe.ingredients],
-        directions: [...this.state.recipe.directions]
+  handleDeleteClicked = async event => {
+    const recipe = copyRecipe(this.state.editRecipe);
+    const recipeId = this.props.match.params.id;
+
+    try {
+      await database()
+        .ref('trash')
+        .child(recipeId)
+        .set(recipe);
+
+      await database()
+        .ref('recipes')
+        .child(recipeId)
+        .set(null);
+
+      this.setState({ recipe: null, isError: true, isEditing: false });
+    } catch (e) {
+      console.error(e);
+    }
+  };
+
+  async UNSAFE_componentWillMount() {
+    const recipeId = this.props.match.params.id;
+    try {
+      const recipeSnapshot = await database()
+        .ref('recipes')
+        .child(recipeId)
+        .once('value');
+
+      let recipe = recipeSnapshot.val();
+
+      if (recipe) {
+        recipe = {
+          tags: [],
+          ingredients: [],
+          directions: [],
+          ...recipeSnapshot.val()
+        };
+        this.setState({ recipe, isLoading: false });
+      } else {
+        throw new Error('recipe does not exist');
       }
-    });
+    } catch (e) {
+      console.error(e);
+      this.setState({ isError: true });
+    }
   }
 
   render() {
     const { classes } = this.props;
-    const { isEditing, recipe, editRecipe } = this.state;
+    const { isError, isLoading, isEditing, recipe, editRecipe } = this.state;
+
+    if (isError) {
+      return (
+        <div className={classes.page}>
+          <Typography variant="display1" className={classes.title}>
+            Recipe does not exist
+          </Typography>
+        </div>
+      );
+    }
+
+    if (isLoading) {
+      return (
+        <div className={classes.page}>
+          <CircularProgress />
+        </div>
+      );
+    }
+
     return (
       <div className={classes.page}>
         <div className={classes.editContainer}>
@@ -198,6 +264,17 @@ class RecipePage extends Component {
                 <Icon className={classes.buttonIcon}>close</Icon>
                 Cancel
               </Button>
+
+              <Button
+                variant="contained"
+                color="secondary"
+                onClick={this.handleDeleteClicked}
+                className={classes.deleteButton}
+              >
+                <Icon className={classes.buttonIcon}>delete</Icon>
+                Delete
+              </Button>
+
               <Button
                 variant="contained"
                 color="secondary"
@@ -247,7 +324,7 @@ class RecipePage extends Component {
                 {isEditing ? (
                   <div className={classes.timeInputContainer}>
                     <TextField
-                      value={editRecipe.duration.value || ''}
+                      value={editRecipe.duration || ''}
                       onChange={this.handleDurationValueChanged}
                       margin="normal"
                       InputProps={{
@@ -259,9 +336,7 @@ class RecipePage extends Component {
                     <div className={classes.timeLabel}>mins</div>
                   </div>
                 ) : (
-                  <div>{`${recipe.duration.value} ${
-                    recipe.duration.unit
-                  }`}</div>
+                  <div>{`${recipe.duration} mins`}</div>
                 )}
               </div>
 
@@ -288,13 +363,19 @@ class RecipePage extends Component {
 
             <div className={classes.tagsContainer}>
               {isEditing
-                ? editRecipe.tags.map(tag => (
-                    <Chip
-                      className={classes.chipEditing}
-                      key={tag}
-                      onDelete={this.handleDeleteTag(tag)}
-                      label={tag}
-                    />
+                ? editRecipe.tags.map((tag, index) => (
+                    <div
+                      key={index}
+                      className={classes.chip + ' ' + classes.chipEditing}
+                    >
+                      <IconButton onClick={this.handleDeleteTag(index)}>
+                        <Icon>cancel</Icon>
+                      </IconButton>
+                      <TextField
+                        value={tag || ''}
+                        onChange={this.handleTagChanged(index)}
+                      />
+                    </div>
                   ))
                 : recipe.tags.map(tag => (
                     <div key={tag} className={classes.chip}>
@@ -303,7 +384,12 @@ class RecipePage extends Component {
                   ))}
 
               {isEditing ? (
-                <Button color="secondary" variant="contained">
+                <Button
+                  color="secondary"
+                  variant="contained"
+                  onClick={this.handleAddTag}
+                  className={classes.addTagButton}
+                >
                   <Icon className={classes.buttonIcon}>add</Icon>
                   Add tag
                 </Button>
@@ -394,7 +480,7 @@ class RecipePage extends Component {
                           className={classes.directionTextEditing}
                           fullWidth={true}
                           multiline={true}
-                          value={step}
+                          value={step || ''}
                           onChange={this.handleStepTextChanged(step, index)}
                         />
                       </div>
@@ -436,7 +522,7 @@ class RecipePage extends Component {
               <TextField
                 label="Image"
                 fullWidth={true}
-                value={editRecipe.image}
+                value={editRecipe.image || ''}
                 onChange={this.handleImageChanged}
               />
             </div>
@@ -539,7 +625,9 @@ const styles = theme => ({
   },
   tagsContainer: {
     flexShrink: 0,
-    display: 'flex'
+    display: 'flex',
+    flexWrap: 'wrap',
+    maxWidth: '100%'
   },
   chip: {
     border: 'solid 1px rgba(255, 255, 255,0.7)',
@@ -603,8 +691,8 @@ const styles = theme => ({
     padding: 50,
     boxSizing: 'border-box',
     alignSelf: 'flex-start',
-    height: '100vh',
-    position:'relative',
+    height: '100%',
+    position: 'relative',
     [theme.breakpoints.down('sm')]: {
       position: 'absolute',
       top: 0,
@@ -631,8 +719,14 @@ const styles = theme => ({
     bottom: 0,
     zIndex: 20,
     [theme.breakpoints.down('sm')]: {
-    bottom: 20,
+      bottom: 20
     }
+  },
+  addTagButton: {
+    maxHeight: 42
+  },
+  deleteButton: {
+    marginRight: 10
   }
 });
 
