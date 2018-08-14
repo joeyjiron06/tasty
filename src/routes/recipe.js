@@ -125,7 +125,15 @@ class RecipePage extends Component {
       ...this.state.editRecipe
     };
     editRecipe.ingredients.push(null);
-    this.setState({ editRecipe });
+    this.setState({ editRecipe }, () => {
+      const selectedElements = document.querySelectorAll(
+        `.${this.props.classes.ingredientInput}`
+      );
+      if (selectedElements.length) {
+        const inputElement = selectedElements[selectedElements.length - 1];
+        inputElement.focus();
+      }
+    });
   };
   handleAddStep = () => {
     const editRecipe = {
@@ -201,6 +209,12 @@ class RecipePage extends Component {
     }
   };
 
+  handleIngredientKeyDown = event => {
+    if (event.target.value && event.keyCode === 13) {
+      this.handleAddIngredient();
+    }
+  };
+
   async UNSAFE_componentWillMount() {
     const recipeId = this.props.match.params.id;
     try {
@@ -218,6 +232,7 @@ class RecipePage extends Component {
           directions: [],
           ...recipeSnapshot.val()
         };
+        console.log('recipe', recipe);
         this.setState({ recipe, isLoading: false });
       } else {
         throw new Error('recipe does not exist');
@@ -426,6 +441,7 @@ class RecipePage extends Component {
                             ingredient,
                             index
                           )}
+                          onKeyDown={this.handleIngredientKeyDown}
                           margin="normal"
                           InputProps={{
                             classes: {
@@ -727,7 +743,8 @@ const styles = theme => ({
   },
   deleteButton: {
     marginRight: 10
-  }
+  },
+  ingredientInput: {}
 });
 
 export default withStyles(styles)(RecipePage);

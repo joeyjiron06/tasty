@@ -72,6 +72,10 @@ class BrowsePage extends Component {
     const { recipes } = this.state;
     return (
       <div className={classes.browsePage}>
+        <Typography variant="display2" gutterBottom>
+          Browse Recipes
+        </Typography>
+
         <div className={classes.recipesGrid}>
           {(recipes || []).map(recipe => (
             <Recipe
