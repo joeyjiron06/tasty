@@ -38,10 +38,11 @@ class AdminPage extends Component {
         .ref('recipes')
         .push({
           dateAdded: database.ServerValue.TIMESTAMP,
-          duration: {},
+          duration: 0,
           tags: [],
           ingredients: [],
-          directions: []
+          directions: [],
+          title: null
         });
 
       this.props.history.push(`/recipe/${recipeSnapshot.key}`);

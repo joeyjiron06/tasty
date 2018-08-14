@@ -58,11 +58,11 @@ class Toolbar extends Component {
             className={
               classes.routeName +
               ' ' +
-              (history.location.pathname === '/recipes'
+              (history.location.pathname === '/browse'
                 ? classes.routeSelected
                 : null)
             }
-            onClick={this.handleRouteClicked('/recipes')}
+            onClick={this.handleRouteClicked('/browse')}
           >
             Recipes
           </Typography>
