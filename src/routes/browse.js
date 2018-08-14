@@ -1,5 +1,9 @@
 import React, { Component } from 'react';
-import { withStyles } from '@material-ui/core/styles';
+import {
+  withStyles,
+  createMuiTheme,
+  MuiThemeProvider
+} from '@material-ui/core/styles';
 import {
   Typography,
   Card,
@@ -9,13 +13,15 @@ import {
 } from '@material-ui/core';
 import { fetchRecipes } from '../model/recipes';
 
+const theme = createMuiTheme({});
+
 const RecipeStyles = {
   card: {
     width: 250,
     cursor: 'pointer',
     display: 'inline-block',
     opacity: 0.9,
-    transition: 'opacity 25ms ease-in',
+    transition: 'opacity 250ms ease-in-out',
     '&:hover': {
       opacity: 1
     }
@@ -27,26 +33,23 @@ const RecipeStyles = {
 
 const Recipe = withStyles(RecipeStyles)(
   ({ recipe, classes, className, onClick }) => (
-    <Card className={classes.card + ' ' + className} onClick={onClick}>
-      <CardMedia
-        className={classes.media}
-        image={recipe.image}
-        title={recipe.title}
-      />
-      <CardContent>
-        <Typography
-          gutterBottom
-          variant="headline"
-          component="h2"
-          noWrap={true}
-        >
-          {recipe.title}
-        </Typography>
-        <Typography component="p" noWrap={true}>
-          {recipe.tags.join(' · ')}
-        </Typography>
-      </CardContent>
-    </Card>
+    <MuiThemeProvider theme={theme}>
+      <Card className={classes.card + ' ' + className} onClick={onClick}>
+        <CardMedia
+          className={classes.media}
+          image={recipe.image}
+          title={recipe.title}
+        />
+        <CardContent>
+          <Typography gutterBottom variant="title" noWrap={true}>
+            {recipe.title}
+          </Typography>
+          <Typography component="p" noWrap={true}>
+            {recipe.tags.join(' · ')}
+          </Typography>
+        </CardContent>
+      </Card>
+    </MuiThemeProvider>
   )
 );
 
