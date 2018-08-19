@@ -8,8 +8,7 @@ import {
   Typography,
   Card,
   CardMedia,
-  CardContent,
-  GridList
+  CardContent
 } from '@material-ui/core';
 import { fetchRecipes } from '../model/recipes';
 

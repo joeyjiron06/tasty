@@ -89,11 +89,15 @@ class AdminPage extends Component {
     }
 
     if (!user.isAdmin) {
-      <div className={classes.adminPage}>
-        <Typography variant="display1">Admin Page</Typography>
-        <Typography>Give admin your id if you want admin privilages</Typography>
-        <Typography>User id: {user.uid}</Typography>
-      </div>;
+      return (
+        <div className={classes.adminPage}>
+          <Typography variant="display1">Admin Page</Typography>
+          <Typography>
+            Give admin your id if you want admin privilages
+          </Typography>
+          <Typography>User id: {user.uid}</Typography>
+        </div>
+      );
     }
 
     return (

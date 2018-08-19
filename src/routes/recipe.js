@@ -6,7 +6,6 @@ import {
   TextField,
   Button,
   IconButton,
-  Chip,
   CircularProgress
 } from '@material-ui/core';
 import { withStyles } from '@material-ui/core/styles';
@@ -70,7 +69,7 @@ class RecipePage extends Component {
   };
   handleDurationValueChanged = event => {
     const text = event.target.value;
-    const number = text && parseInt(text);
+    const number = text && parseInt(text, 10);
 
     if (number === undefined) {
       return;
