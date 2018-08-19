@@ -140,7 +140,15 @@ class RecipePage extends Component {
       ...this.state.editRecipe
     };
     editRecipe.directions.push(null);
-    this.setState({ editRecipe });
+    this.setState({ editRecipe }, () => {
+      const selectedElements = document.querySelectorAll(
+        `.${this.props.classes.stepInput}`
+      );
+      if (selectedElements.length) {
+        const inputElement = selectedElements[selectedElements.length - 1];
+        inputElement.focus();
+      }
+    });
   };
 
   handleDeleteTag = index => () => {
@@ -163,8 +171,13 @@ class RecipePage extends Component {
   handleStepTextChanged = (step, index) => event => {
     const newText = event.target.value;
     const editRecipe = this.state.editRecipe;
-    editRecipe.directions[index] = newText;
-    this.setState({ editRecipe });
+
+    if (newText.includes('\n')) {
+      this.handleAddStep();
+    } else {
+      editRecipe.directions[index] = newText;
+      this.setState({ editRecipe });
+    }
   };
 
   handleIngredientChanged = (ingredient, index) => event => {
@@ -498,6 +511,11 @@ class RecipePage extends Component {
                           multiline={true}
                           value={step || ''}
                           onChange={this.handleStepTextChanged(step, index)}
+                          InputProps={{
+                            classes: {
+                              input: classes.stepInput
+                            }
+                          }}
                         />
                       </div>
                     ))
@@ -744,7 +762,8 @@ const styles = theme => ({
   deleteButton: {
     marginRight: 10
   },
-  ingredientInput: {}
+  ingredientInput: {},
+  stepInput: {}
 });
 
 export default withStyles(styles)(RecipePage);
