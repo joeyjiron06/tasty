@@ -1,56 +1,8 @@
 import React, { Component } from 'react';
-import {
-  withStyles,
-  createMuiTheme,
-  MuiThemeProvider
-} from '@material-ui/core/styles';
-import {
-  Typography,
-  Card,
-  CardMedia,
-  CardContent
-} from '@material-ui/core';
-import { fetchRecipes } from '../model/recipes';
-
-const theme = createMuiTheme({});
-
-const RecipeStyles = {
-  card: {
-    width: 250,
-    cursor: 'pointer',
-    display: 'inline-block',
-    opacity: 0.9,
-    transition: 'opacity 250ms ease-in-out',
-    '&:hover': {
-      opacity: 1
-    }
-  },
-  media: {
-    height: 260
-  }
-};
-
-const Recipe = withStyles(RecipeStyles)(
-  ({ recipe, classes, className, onClick }) => (
-    <MuiThemeProvider theme={theme}>
-      <Card className={classes.card + ' ' + className} onClick={onClick}>
-        <CardMedia
-          className={classes.media}
-          image={recipe.image}
-          title={recipe.title}
-        />
-        <CardContent>
-          <Typography gutterBottom variant="title" noWrap={true}>
-            {recipe.title}
-          </Typography>
-          <Typography component="p" noWrap={true}>
-            {recipe.tags.join(' · ')}
-          </Typography>
-        </CardContent>
-      </Card>
-    </MuiThemeProvider>
-  )
-);
+import { withStyles } from '@material-ui/core/styles';
+import { Typography } from '@material-ui/core';
+import { fetchRecipes } from '../api/recipes';
+import RecipeCard from '../components/recipeCard';
 
 class BrowsePage extends Component {
   state = {
@@ -58,12 +10,17 @@ class BrowsePage extends Component {
   };
 
   async UNSAFE_componentWillMount() {
+    this.mounted = true;
     try {
       const recipes = await fetchRecipes();
       this.setState({
         recipes
       });
     } catch (e) {}
+  }
+
+  UNSAFE_componentWillUnMount() {
+    this.mounted = false;
   }
 
   render() {
@@ -77,7 +34,7 @@ class BrowsePage extends Component {
 
         <div className={classes.recipesGrid}>
           {(recipes || []).map(recipe => (
-            <Recipe
+            <RecipeCard
               key={recipe.id}
               recipe={recipe}
               className={classes.recipeCard}
