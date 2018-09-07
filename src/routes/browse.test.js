@@ -1,32 +1,69 @@
 import React from 'react';
-import { mount } from 'enzyme';
-import { unwrap } from '@material-ui/core/test-utils';
+// import { mount } from 'enzyme';
+import { unwrap, createMount } from '@material-ui/core/test-utils';
 import BrowsePage from './browse';
+import RecipeCard from '../components/recipeCard.js';
+import { fetchRecipes } from '../api/recipes.js';
+
+jest.mock('../api/recipes.js');
 
 describe('<BrowsePage />', () => {
   it('should have a title', () => {
-    const browsePage = mountRender();
+    const browsePage = renderBrowsePage();
     expect(browsePage.getTitle()).toBe('Browse Recipes');
   });
-  it('should render the fetched recipes');
+  it('should render the fetched recipes', async () => {
+    const promise = Promise.resolve([
+      {
+        id: 0,
+        title: 'Soba Noodles',
+        image: 'http://image.com',
+        tags: ['Dinner', 'Noodles']
+      },
+      {
+        id: 1,
+        title: 'Miso Soup',
+        image: 'http://image.com',
+        tags: ['Dinner', 'Soup']
+      },
+      {
+        id: 2,
+        title: 'Gyoza',
+        image: 'http://image.com',
+        tags: ['Dinner', 'Dumplings']
+      }
+    ]);
+    fetchRecipes.mockImplementation(() => promise);
+    const browsePage = renderBrowsePage();
+    const recipes = await promise;
+
+    browsePage.update();
+
+    expect(browsePage.findCards()).toHaveLength(recipes.length);
+
+    recipes.forEach((recipe, index) => {
+      const recipeProp = browsePage
+        .findCards()
+        .at(index)
+        .props().recipe;
+
+      expect(recipeProp).toEqual(recipe);
+    });
+  });
+  it('should render no results when recipe list is empty');
+  it('should render an error when error fetching recipes');
 });
 
-const mountRender = props => {
-  const BrowsePageUnwrapped = unwrap(BrowsePage);
-  const wrapper = mount(<BrowsePageUnwrapped {...props} />);
+const renderBrowsePage = props => {
+  const mount = createMount();
+  const wrapper = mount(<BrowsePage {...props} />);
+  wrapper.getTitle = () =>
+    wrapper
+      .find('[data-test="browsepage-title"]')
+      .last()
+      .props().children;
 
-  // wrapper.getImageUrl = () =>
-  //   wrapper.find('[data-test="recipecard-image"]').props().image;
-
-  // wrapper.getTitle = () =>
-  //   wrapper.find('[data-test="recipecard-title"]').props().children;
-
-  // wrapper.getTags = () =>
-  //   wrapper.find('[data-test="recipecard-tags"]').props().children;
-
-  // wrapper.findCard = () => wrapper.find('[data-test="recipecard-card"]');
-
-  // wrapper.click = () => wrapper.findCard().simulate('click');
+  wrapper.findCards = () => wrapper.find(RecipeCard).children();
 
   return wrapper;
 };

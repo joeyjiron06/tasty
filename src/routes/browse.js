@@ -28,7 +28,11 @@ class BrowsePage extends Component {
     const { recipes } = this.state;
     return (
       <div className={classes.browsePage}>
-        <Typography variant="display2" gutterBottom>
+        <Typography
+          variant="display2"
+          gutterBottom
+          data-test="browsepage-title"
+        >
           Browse Recipes
         </Typography>
 
@@ -49,7 +53,7 @@ class BrowsePage extends Component {
   }
 }
 
-const styles = theme => ({
+export const styles = theme => ({
   browsePage: {
     padding: 40
   },
