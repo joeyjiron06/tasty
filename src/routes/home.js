@@ -1,29 +1,24 @@
-import React, { Component } from 'react';
+import React from 'react';
 import { withStyles } from '@material-ui/core/styles';
 import { Typography } from '@material-ui/core';
 
-class HomePage extends Component {
-  render() {
-    const { classes } = this.props;
-    return (
-      <div className={classes.homePage}>
-        <div className={classes.bgImageContainer}>
-          <img
-            className={classes.bgImage}
-            src="img/home-bg-1.jpg"
-            alt="background"
-          />
-          <div className={classes.bgImageOverlay} />
-        </div>
+const HomePage = ({ classes }) => (
+  <div className={classes.homePage}>
+    <div className={classes.bgImageContainer}>
+      <img
+        className={classes.bgImage}
+        src="img/home-bg-1.jpg"
+        alt="background"
+      />
+      <div className={classes.bgImageOverlay} />
+    </div>
 
-        <div className={classes.titleContainer}>
-          <Typography variant="display4">Tasty</Typography>
-          <Typography variant="subheading">Recipes made easy</Typography>
-        </div>
-      </div>
-    );
-  }
-}
+    <div className={classes.titleContainer}>
+      <Typography variant="display4">Tasty</Typography>
+      <Typography variant="subheading">Recipes made easy</Typography>
+    </div>
+  </div>
+);
 
 const styles = theme => ({
   homePage: {},

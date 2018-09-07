@@ -3,26 +3,6 @@ import { shallow } from 'enzyme';
 import { unwrap } from '@material-ui/core/test-utils';
 import RecipeCard from './recipeCard';
 
-const shallowRender = props => {
-  const RecipeCardUnwrapped = unwrap(RecipeCard);
-  const wrapper = shallow(<RecipeCardUnwrapped {...props} />);
-
-  wrapper.getImageUrl = () =>
-    wrapper.find('[data-test="recipecard-image"]').props().image;
-
-  wrapper.getTitle = () =>
-    wrapper.find('[data-test="recipecard-title"]').props().children;
-
-  wrapper.getTags = () =>
-    wrapper.find('[data-test="recipecard-tags"]').props().children;
-
-  wrapper.findCard = () => wrapper.find('[data-test="recipecard-card"]');
-
-  wrapper.click = () => wrapper.findCard().simulate('click');
-
-  return wrapper;
-};
-
 describe('<RecipeCard />', () => {
   const recipe = {
     image: 'http://image.com',
@@ -79,3 +59,23 @@ describe('<RecipeCard />', () => {
     });
   });
 });
+
+const shallowRender = props => {
+  const RecipeCardUnwrapped = unwrap(RecipeCard);
+  const wrapper = shallow(<RecipeCardUnwrapped {...props} />);
+
+  wrapper.getImageUrl = () =>
+    wrapper.find('[data-test="recipecard-image"]').props().image;
+
+  wrapper.getTitle = () =>
+    wrapper.find('[data-test="recipecard-title"]').props().children;
+
+  wrapper.getTags = () =>
+    wrapper.find('[data-test="recipecard-tags"]').props().children;
+
+  wrapper.findCard = () => wrapper.find('[data-test="recipecard-card"]');
+
+  wrapper.click = () => wrapper.findCard().simulate('click');
+
+  return wrapper;
+};

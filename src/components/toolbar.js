@@ -43,7 +43,6 @@ class Toolbar extends Component {
             inputRef={ref => (this.searchInputRef = ref)}
             onChange={this.handleSearchChanged}
             className={`${classes.searchInput}
-            
             ${
               showSearchField
                 ? classes.searchInputShown
