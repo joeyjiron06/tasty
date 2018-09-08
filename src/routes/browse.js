@@ -1,31 +1,43 @@
 import React, { Component } from 'react';
 import { withStyles } from '@material-ui/core/styles';
-import { Typography } from '@material-ui/core';
+import { Typography, CircularProgress } from '@material-ui/core';
 import { fetchRecipes } from '../api/recipes';
 import RecipeCard from '../components/recipeCard';
 
 class BrowsePage extends Component {
   state = {
     recipes: null,
-    error: false
+    error: false,
+    isLoading: true
   };
 
   async UNSAFE_componentWillMount() {
     try {
       const recipes = await fetchRecipes();
+
+      // change the size of the image. note that this is brittle because the url
+      // might not contain this substring. this code assumes we used this website
+      // to get the url:
+      // https://ctrlq.org/google/photos/
+      recipes.forEach(recipe => {
+        recipe.image = recipe.image.replace('=w2400', '=w512');
+      });
+
       this.setState({
-        recipes
+        recipes,
+        isLoading: false
       });
     } catch (e) {
       this.setState({
-        error: true
+        error: true,
+        isLoading: false
       });
     }
   }
 
   render() {
     const { classes, history } = this.props;
-    const { recipes, error } = this.state;
+    const { recipes, error, isLoading } = this.state;
 
     return (
       <div className={classes.browsePage}>
@@ -33,6 +45,7 @@ class BrowsePage extends Component {
           variant="display2"
           gutterBottom
           data-test="browsepage-title"
+          className={classes.title}
         >
           Browse Recipes
         </Typography>
@@ -44,6 +57,12 @@ class BrowsePage extends Component {
                 <Typography data-test="browsepage-error">
                   Error fetching recipes
                 </Typography>
+              );
+            }
+
+            if (isLoading) {
+              return (
+                <CircularProgress data-test="browsepage-loading-indicator" />
               );
             }
 
@@ -76,13 +95,30 @@ const styles = theme => ({
   browsePage: {
     padding: 40
   },
+  title: {},
   recipesGrid: {
-    display: 'flex',
-    flexWrap: 'wrap'
+    flexWrap: 'wrap',
+    display: 'grid',
+    'grid-template-columns': 'repeat(auto-fill,288px)',
+    margin: '0 auto'
   },
   recipeCard: {
     marginRight: 30,
     marginBottom: 30
+  },
+  [theme.breakpoints.down('xs')]: {
+    browsePage: {
+      padding: 10
+    },
+    recipesGrid: {
+      'grid-template-columns': 'repeat(auto-fill,minmax(300px,100%))'
+    },
+    recipeCard: {
+      width: '100%'
+    },
+    title: {
+      'font-size': '28px'
+    }
   }
 });
 

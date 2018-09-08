@@ -79,6 +79,17 @@ describe('<BrowsePage />', () => {
       expect(errorContainer.text()).toBe('Error fetching recipes');
     }
   });
+
+  it('should render a loading circle when loading', async () => {
+    const promise = new Promise(resolve => setTimeout(resolve, 750));
+    fetchRecipes.mockImplementation(() => promise);
+
+    const browsePage = renderPage();
+
+    const loadingIndicator = browsePage.findLoadingIndicator();
+    expect(loadingIndicator).toExist();
+    await promise;
+  });
 });
 
 const renderPage = props => {
@@ -94,6 +105,9 @@ const renderPage = props => {
 
   wrapper.getErrorContainer = () =>
     wrapper.find('[data-test="browsepage-error"] p');
+
+  wrapper.findLoadingIndicator = () =>
+    wrapper.find('[data-test="browsepage-loading-indicator"]');
 
   return wrapper;
 };
