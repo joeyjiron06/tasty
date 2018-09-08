@@ -412,7 +412,7 @@ class RecipePage extends Component {
                       />
                     </div>
                   ))
-                : recipe.tags.map(tag => (
+                : (recipe.tags || []).map(tag => (
                     <div key={tag} className={classes.chip}>
                       {tag}
                     </div>
