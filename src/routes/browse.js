@@ -6,7 +6,8 @@ import RecipeCard from '../components/recipeCard';
 
 class BrowsePage extends Component {
   state = {
-    recipes: null
+    recipes: null,
+    error: false
   };
 
   async UNSAFE_componentWillMount() {
@@ -16,7 +17,11 @@ class BrowsePage extends Component {
       this.setState({
         recipes
       });
-    } catch (e) {}
+    } catch (e) {
+      this.setState({
+        error: true
+      });
+    }
   }
 
   UNSAFE_componentWillUnMount() {
@@ -25,7 +30,8 @@ class BrowsePage extends Component {
 
   render() {
     const { classes, history } = this.props;
-    const { recipes } = this.state;
+    const { recipes, error } = this.state;
+
     return (
       <div className={classes.browsePage}>
         <Typography
@@ -37,23 +43,41 @@ class BrowsePage extends Component {
         </Typography>
 
         <div className={classes.recipesGrid}>
-          {(recipes || []).map(recipe => (
-            <RecipeCard
-              key={recipe.id}
-              recipe={recipe}
-              className={classes.recipeCard}
-              onClick={() => {
-                history.push(`/recipe/${recipe.id}`);
-              }}
-            />
-          ))}
+          {(() => {
+            if (error) {
+              return (
+                <Typography data-test="browsepage-error">
+                  Error fetching recipes
+                </Typography>
+              );
+            }
+
+            if (!recipes || !recipes.length) {
+              return (
+                <Typography data-test="browsepage-no-results">
+                  No Results
+                </Typography>
+              );
+            }
+
+            return recipes.map(recipe => (
+              <RecipeCard
+                key={recipe.id}
+                recipe={recipe}
+                className={classes.recipeCard}
+                onClick={() => {
+                  history.push(`/recipe/${recipe.id}`);
+                }}
+              />
+            ));
+          })()}
         </div>
       </div>
     );
   }
 }
 
-export const styles = theme => ({
+const styles = theme => ({
   browsePage: {
     padding: 40
   },
