@@ -11,7 +11,6 @@ class BrowsePage extends Component {
   };
 
   async UNSAFE_componentWillMount() {
-    this.mounted = true;
     try {
       const recipes = await fetchRecipes();
       this.setState({
@@ -22,10 +21,6 @@ class BrowsePage extends Component {
         error: true
       });
     }
-  }
-
-  UNSAFE_componentWillUnMount() {
-    this.mounted = false;
   }
 
   render() {
