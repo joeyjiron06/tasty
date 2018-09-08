@@ -14,13 +14,13 @@ class BrowsePage extends Component {
   async UNSAFE_componentWillMount() {
     try {
       const recipes = await fetchRecipes();
-
+      console.log(recipes);
       // change the size of the image. note that this is brittle because the url
       // might not contain this substring. this code assumes we used this website
       // to get the url:
       // https://ctrlq.org/google/photos/
       recipes.forEach(recipe => {
-        recipe.image = recipe.image.replace('=w2400', '=w512');
+        recipe.image = recipe.image && recipe.image.replace('=w2400', '=w512');
       });
 
       this.setState({
@@ -28,6 +28,7 @@ class BrowsePage extends Component {
         isLoading: false
       });
     } catch (e) {
+      console.error(e);
       this.setState({
         error: true,
         isLoading: false

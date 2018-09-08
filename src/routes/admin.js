@@ -1,13 +1,50 @@
 import React, { Component } from 'react';
-import { withStyles } from '@material-ui/core/styles';
-import { Typography, Button } from '@material-ui/core';
-import { auth, database } from 'firebase';
+import {
+  withStyles,
+  createMuiTheme,
+  MuiThemeProvider
+} from '@material-ui/core/styles';
+import {
+  Typography,
+  Button,
+  CircularProgress,
+  Card,
+  CardActions,
+  CardMedia,
+  CardContent
+} from '@material-ui/core';
+import { blue } from '@material-ui/core/colors';
+
+import {
+  addRecipe,
+  authUser,
+  fetchTrash,
+  checkReturingUser,
+  deleteFromTrash
+} from '../api/recipes';
+
+const theme = createMuiTheme({
+  palette: {
+    primary: blue
+  }
+});
 
 class AdminPage extends Component {
   state = {
     user: null,
-    isLoading: false
+    isLoading: true
   };
+
+  async UNSAFE_componentWillMount() {
+    try {
+      const user = await checkReturingUser();
+      this.setState({ user, isLoading: false });
+    } catch (e) {
+      this.setState({
+        isLoading: false
+      });
+    }
+  }
 
   handleLogin = async event => {
     this.setState({
@@ -16,14 +53,9 @@ class AdminPage extends Component {
     });
 
     try {
-      const user = await this.fetchUser();
+      const user = await authUser();
+      localStorage.setItem('user', JSON.stringify(user));
 
-      const isAdminSnapshot = await database()
-        .ref('admins')
-        .child(user.uid)
-        .once('value');
-
-      user.isAdmin = isAdminSnapshot.val();
       this.setState({
         user
       });
@@ -34,53 +66,83 @@ class AdminPage extends Component {
 
   handleAddNewButton = async event => {
     try {
-      const recipeSnapshot = await database()
-        .ref('recipes')
-        .push({
-          dateAdded: database.ServerValue.TIMESTAMP,
-          duration: 0,
-          tags: [],
-          ingredients: [],
-          directions: [],
-          title: null
-        });
+      const newRecipeId = await addRecipe();
+      this.props.history.push({
+        pathname: `/recipe/${newRecipeId}`,
+        state: {
+          allowEditMode: true
+        }
+      });
 
-      this.props.history.push(`/recipe/${recipeSnapshot.key}`);
+      this.navigateToRecipePage(newRecipeId);
     } catch (e) {
       console.log('error', e);
     }
   };
 
-  async fetchUser() {
-    const savedUser = localStorage.getItem('user');
-    if (savedUser) {
-      return JSON.parse(savedUser);
+  handleShowTrash = async () => {
+    this.setState({
+      trash: {
+        isLoading: true,
+        error: false,
+        items: null
+      }
+    });
+
+    try {
+      const trashItems = await fetchTrash();
+      this.setState({
+        trash: {
+          ...this.state.trash,
+          isLoading: false,
+          items: trashItems
+        }
+      });
+    } catch (e) {
+      console.error(e);
+      this.setState({
+        trash: {
+          ...this.state.trash,
+          isLoading: false,
+          error: true
+        }
+      });
     }
+  };
 
-    const authResult = await auth().signInWithPopup(
-      new auth.FacebookAuthProvider()
-    );
-    const user = authResult.user;
+  handleDeleteRecipe = recipe => async () => {
+    await deleteFromTrash(recipe.id);
+    await this.handleShowTrash();
+  };
 
-    localStorage.setItem(JSON.stringify(user));
-
-    return user;
-  }
+  handleEditRecipe = recipe => () => {
+    this.props.history.push({
+      pathname: `/recipe/${recipe.id}`,
+      state: {
+        recipe
+      }
+    });
+  };
 
   render() {
     const { classes } = this.props;
-    const { user } = this.state;
+    const { user, trash, isLoading } = this.state;
 
     if (!user) {
       return (
         <div className={classes.adminPage}>
           <Typography>You must log in to view this page</Typography>
 
+          {isLoading && (
+            <CircularProgress className={classes.loadingIndicator} />
+          )}
+
           <Button
             variant="contained"
             color="secondary"
             className={classes.loginButton}
             onClick={this.handleLogin}
+            disabled={isLoading}
           >
             Log in with Facebook
           </Button>
@@ -103,9 +165,90 @@ class AdminPage extends Component {
     return (
       <div className={classes.adminPage}>
         <Typography variant="display1">Admin Page</Typography>
-        <Button className={classes.button} onClick={this.handleAddNewButton}>
+
+        <Button
+          className={classes.button}
+          onClick={this.handleAddNewButton}
+          color="secondary"
+          variant="contained"
+        >
           New recipe
         </Button>
+
+        <Button
+          className={classes.button}
+          onClick={this.handleShowTrash}
+          color="secondary"
+          variant="contained"
+        >
+          Show Trash
+        </Button>
+
+        {(() => {
+          if (!trash) {
+            return;
+          }
+
+          if (trash.error) {
+            return (
+              <div onClick={this.handleShowTrash}>
+                Error loading trash. Click to reload
+              </div>
+            );
+          }
+
+          if (trash.isLoading) {
+            return <CircularProgress className={classes.loadingIndicator} />;
+          }
+
+          if (!trash.items.length) {
+            return <div>No results</div>;
+          }
+
+          return (
+            <MuiThemeProvider theme={theme}>
+              <div className={classes.trashContainer}>
+                {trash.items.map(recipe => (
+                  <Card className={classes.trashCard} key={recipe.id}>
+                    <CardMedia
+                      className={classes.trashCardImage}
+                      image={recipe.image || 'nothinghere'}
+                      title={recipe.title || 'recipe'}
+                    />
+                    <CardContent>
+                      <Typography
+                        gutterBottom
+                        variant="headline"
+                        component="h2"
+                      >
+                        {recipe.title || 'No title'}
+                      </Typography>
+                      <Typography component="p">
+                        {recipe.id || 'No id'}
+                      </Typography>
+                    </CardContent>
+                    <CardActions>
+                      <Button
+                        size="small"
+                        color="primary"
+                        onClick={this.handleDeleteRecipe(recipe)}
+                      >
+                        Delete
+                      </Button>
+                      <Button
+                        size="small"
+                        color="primary"
+                        onClick={this.handleEditRecipe(recipe)}
+                      >
+                        Edit
+                      </Button>
+                    </CardActions>
+                  </Card>
+                ))}
+              </div>
+            </MuiThemeProvider>
+          );
+        })()}
       </div>
     );
   }
@@ -122,7 +265,29 @@ const styles = theme => ({
     marginTop: 20
   },
   button: {
-    marginTop: 20
+    marginTop: 20,
+    marginRight: 20,
+    marginBottom: 20
+  },
+  loadingIndicator: {
+    display: 'block',
+    marginTop: 20,
+    marginBottom: 20,
+    color: 'white'
+  },
+  trashContainer: {
+    display: 'flex',
+    flexWrap: 'wrap',
+    marginTop: 40
+  },
+  trashCard: {
+    width: 220,
+    marginRight: 20,
+    marginBottom: 20
+  },
+  trashCardImage: {
+    minHeight: 100,
+    backgroundColor: 'grey'
   }
 });
 

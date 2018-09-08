@@ -1,4 +1,4 @@
-import { database } from 'firebase';
+import { database, auth } from 'firebase';
 
 /**
  * @typedef Recipe
@@ -10,6 +10,13 @@ import { database } from 'firebase';
  * @property {string} image - the image url
  * @property {number} serves - the amount of people that the recipe serves
  * @property {number} duration - how long in minutes it takes to make the recipe
+ */
+
+/**
+ * @typedef User
+ * @type Object
+ * @property {string} uid - a user id.
+ * @property {boolean} isAdming - is a user an admin or not
  */
 
 export async function fetchRecipes() {
@@ -67,6 +74,26 @@ export async function updateRecipe(recipeId, recipe) {
 }
 
 /**
+ * fetch recipes in the trash
+ * @return {Recipe[]} array of recipes
+ */
+export async function fetchTrash() {
+  const snapshot = await database()
+    .ref('trash')
+    .once('value');
+
+  const recipes = [];
+  snapshot.forEach(recipeSnapshot => {
+    recipes.push({
+      ...recipeSnapshot.val(),
+      id: recipeSnapshot.key
+    });
+  });
+
+  return recipes;
+}
+
+/**
  * @param {string} recipeId - the recipe id
  */
 export async function moveRecipeToTrash(recipeId) {
@@ -82,6 +109,13 @@ export async function moveRecipeToTrash(recipeId) {
     .set(recipe);
 }
 
+export async function deleteFromTrash(recipeId) {
+  await database()
+    .ref('trash')
+    .child(recipeId)
+    .set(null);
+}
+
 /**
  * @param {string} recipeId - the recipe id
  */
@@ -90,4 +124,73 @@ export async function deleteRecipe(recipeId) {
     .ref('recipes')
     .child(recipeId)
     .set(null);
+}
+
+/**
+ * Creates a new recipe in the database.
+ * @return {string} the new recipe id
+ */
+export async function addRecipe() {
+  const recipeSnapshot = await database()
+    .ref('recipes')
+    .push({
+      dateAdded: database.ServerValue.TIMESTAMP,
+      duration: 0,
+      tags: [],
+      ingredients: [],
+      directions: [],
+      title: '',
+      image: ''
+    });
+
+  return recipeSnapshot.key;
+}
+
+/**
+ * Authenticate the user
+ * @return {object} a user object
+ * @return {boolean} object.isAdmin - is user admin or not
+ * @return {string} object.uid - user's id
+ */
+export async function authUser() {
+  const { user } = await auth().signInWithPopup(
+    new auth.FacebookAuthProvider()
+  );
+
+  const isAdmin = await fetchIsAdmin(user.id);
+  return {
+    uid: user.uid,
+    isAdmin
+  };
+}
+
+async function fetchIsAdmin(userId) {
+  const isAdminSnapshot = await database()
+    .ref('admins')
+    .child(userId)
+    .once('value');
+
+  return isAdminSnapshot.val();
+}
+
+function onAuthStateChanged() {
+  return new Promise((resolve, reject) => {
+    auth().onAuthStateChanged(user => {
+      if (user) {
+        resolve(user);
+      } else {
+        reject(new Error('no returning user'));
+      }
+    });
+  });
+}
+
+export async function checkReturingUser() {
+  const user = await onAuthStateChanged();
+  const isAdmin = await fetchIsAdmin(user.uid);
+
+  return {
+    uid: user.uid,
+    isAdmin
+  };
 }

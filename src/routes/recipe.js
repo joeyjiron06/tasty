@@ -29,7 +29,8 @@ class RecipePage extends Component {
     isEditing: false,
     isError: false,
     recipe: null,
-    editRecipe: null
+    editRecipe: null,
+    showEditButton: false
   };
 
   handleTitleChanged = event => {
@@ -222,15 +223,31 @@ class RecipePage extends Component {
 
   async UNSAFE_componentWillMount() {
     const recipeId = this.props.match.params.id;
+    const locationState = this.props.location.state || {};
+
     try {
-      const recipe = await fetchRecipe(recipeId);
+      const recipe = locationState.recipe || (await fetchRecipe(recipeId));
 
       if (!recipe) {
         throw new Error('recipe does not exist');
       }
 
-      console.log('recipe', recipe);
-      this.setState({ recipe, isLoading: false });
+      const user = JSON.parse(localStorage.getItem('user'));
+      const isEditMode = locationState.editMode;
+      const showEditButton = user && user.isAdmin;
+
+      this.setState(
+        {
+          recipe,
+          isLoading: false,
+          showEditButton
+        },
+        () => {
+          if (isEditMode && showEditButton) {
+            this.handleEditClicked();
+          }
+        }
+      );
     } catch (e) {
       console.error(e);
       this.setState({ isError: true });
@@ -239,7 +256,14 @@ class RecipePage extends Component {
 
   render() {
     const { classes } = this.props;
-    const { isError, isLoading, isEditing, recipe, editRecipe } = this.state;
+    const {
+      isError,
+      isLoading,
+      isEditing,
+      recipe,
+      editRecipe,
+      showEditButton
+    } = this.state;
 
     if (isError) {
       return (
@@ -294,14 +318,16 @@ class RecipePage extends Component {
               </Button>
             </div>
           ) : (
-            <Button
-              variant="contained"
-              color="secondary"
-              onClick={this.handleEditClicked}
-            >
-              <Icon className={classes.buttonIcon}>edit</Icon>
-              Edit
-            </Button>
+            showEditButton && (
+              <Button
+                variant="contained"
+                color="secondary"
+                onClick={this.handleEditClicked}
+              >
+                <Icon className={classes.buttonIcon}>edit</Icon>
+                Edit
+              </Button>
+            )
           )}
         </div>
 
@@ -555,7 +581,8 @@ const styles = theme => ({
     zIndex: 1,
     [theme.breakpoints.up('sm')]: {
       minHeight: '100vh'
-    }
+    },
+    color: 'white'
   },
   editContainer: {
     display: 'flex',

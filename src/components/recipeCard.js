@@ -19,7 +19,7 @@ const RecipeCard = ({ recipe, className, onClick, classes = {} }) => (
     >
       <CardMedia
         className={classes.media}
-        image={recipe.image}
+        image={recipe.image || ''}
         title={recipe.title}
         data-test="recipecard-image"
       />
@@ -33,7 +33,7 @@ const RecipeCard = ({ recipe, className, onClick, classes = {} }) => (
           {recipe.title}
         </Typography>
         <Typography component="p" noWrap={true} data-test="recipecard-tags">
-          {recipe.tags.join(' · ')}
+          {(recipe.tags || []).join(' · ')}
         </Typography>
       </CardContent>
     </Card>
