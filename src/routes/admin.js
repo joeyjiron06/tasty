@@ -38,6 +38,7 @@ class AdminPage extends Component {
   async UNSAFE_componentWillMount() {
     try {
       const user = await checkReturingUser();
+      localStorage.setItem('user', JSON.stringify(user));
       this.setState({ user, isLoading: false });
     } catch (e) {
       this.setState({

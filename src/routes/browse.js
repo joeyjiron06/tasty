@@ -14,7 +14,7 @@ class BrowsePage extends Component {
   async UNSAFE_componentWillMount() {
     try {
       const recipes = await fetchRecipes();
-      console.log(recipes);
+
       // change the size of the image. note that this is brittle because the url
       // might not contain this substring. this code assumes we used this website
       // to get the url:
