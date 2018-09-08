@@ -203,7 +203,6 @@ class RecipePage extends Component {
   };
 
   handleDeleteClicked = async event => {
-    const recipe = copyRecipe(this.state.editRecipe);
     const recipeId = this.props.match.params.id;
 
     try {
