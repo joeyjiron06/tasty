@@ -73,8 +73,6 @@ class AdminPage extends Component {
           allowEditMode: true
         }
       });
-
-      this.navigateToRecipePage(newRecipeId);
     } catch (e) {
       console.log('error', e);
     }
