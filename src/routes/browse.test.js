@@ -58,7 +58,6 @@ describe('<BrowsePage />', () => {
 
     browsePage.update();
     const noResultsContainer = browsePage.getNoResultsContainer();
-    console.log(noResultsContainer.debug());
 
     expect(noResultsContainer).toExist();
     expect(noResultsContainer.text()).toBe('No Results');
