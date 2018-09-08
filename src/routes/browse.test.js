@@ -53,7 +53,7 @@ describe('<BrowsePage />', () => {
     const promise = Promise.resolve([]);
     fetchRecipes.mockImplementation(() => promise);
     const browsePage = renderPage();
-    const recipes = await promise;
+    await promise;
 
     browsePage.update();
     const noResultsContainer = browsePage.getNoResultsContainer();
