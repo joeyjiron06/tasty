@@ -7,7 +7,7 @@ import BrowsePage from './browse';
 import Toolbar from '../components/toolbar';
 
 export default () => (
-  <Router basename={process.env.PUBLIC_URL}>
+  <Router>
     <div>
       <Toolbar />
       <Route exact path="/" component={HomePage} />
