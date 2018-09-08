@@ -12,31 +12,31 @@ describe('<RecipeCard />', () => {
 
   describe('render recipe', () => {
     it('should render the image', () => {
-      const recipeCard = shallowRender({ recipe });
+      const recipeCard = renderCard({ recipe });
       expect(recipeCard.getImageUrl()).toBe(recipe.image);
     });
 
     it('should render the title', () => {
-      const recipeCard = shallowRender({ recipe });
+      const recipeCard = renderCard({ recipe });
       expect(recipeCard.getTitle()).toBe(recipe.title);
     });
 
     it('should render the tags', () => {
-      const recipeCard = shallowRender({ recipe });
+      const recipeCard = renderCard({ recipe });
       expect(recipeCard.getTags()).toBe(recipe.tags.join(' · '));
     });
   });
 
   describe('className props', () => {
     it('should not add className if none are given', () => {
-      const recipeCard = shallowRender({ recipe });
+      const recipeCard = renderCard({ recipe });
       expect(recipeCard.findCard()).toHaveProp({
         className: ''
       });
     });
 
     it('should add className to card', () => {
-      const recipeCard = shallowRender({ recipe, className: 'testme' });
+      const recipeCard = renderCard({ recipe, className: 'testme' });
       expect(recipeCard.findCard()).toHaveClassName('testme');
     });
   });
@@ -44,14 +44,15 @@ describe('<RecipeCard />', () => {
   describe('onClick', () => {
     it('shuold pass the onClick function to the card', () => {
       const onClick = jest.fn();
-      const recipeCard = shallowRender({ recipe, onClick });
+      const recipeCard = renderCard({ recipe, onClick });
       expect(recipeCard.findCard()).toHaveProp({
         onClick
       });
     });
+
     it('should invoke the onClick function when a card is clicked', () => {
       const onClick = jest.fn();
-      const recipeCard = shallowRender({ recipe, onClick });
+      const recipeCard = renderCard({ recipe, onClick });
 
       recipeCard.click();
 
@@ -60,7 +61,7 @@ describe('<RecipeCard />', () => {
   });
 });
 
-const shallowRender = props => {
+const renderCard = props => {
   const RecipeCardUnwrapped = unwrap(RecipeCard);
   const wrapper = shallow(<RecipeCardUnwrapped {...props} />);
 

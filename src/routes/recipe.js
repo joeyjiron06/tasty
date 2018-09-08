@@ -9,7 +9,12 @@ import {
   CircularProgress
 } from '@material-ui/core';
 import { withStyles } from '@material-ui/core/styles';
-import { database } from 'firebase';
+import {
+  fetchRecipe,
+  updateRecipe,
+  moveRecipeToTrash,
+  deleteRecipe
+} from '../api/recipes';
 
 const copyRecipe = recipe => ({
   ...recipe,
@@ -46,10 +51,7 @@ class RecipePage extends Component {
     recipe.tags = recipe.tags.filter(tag => !!tag);
 
     try {
-      await database()
-        .ref('recipes')
-        .child(recipeId)
-        .set(recipe);
+      await updateRecipe(recipeId, recipe);
     } catch (e) {
       console.error(e);
     }
@@ -205,16 +207,8 @@ class RecipePage extends Component {
     const recipeId = this.props.match.params.id;
 
     try {
-      await database()
-        .ref('trash')
-        .child(recipeId)
-        .set(recipe);
-
-      await database()
-        .ref('recipes')
-        .child(recipeId)
-        .set(null);
-
+      await moveRecipeToTrash(recipeId);
+      await deleteRecipe(recipeId);
       this.setState({ recipe: null, isError: true, isEditing: false });
     } catch (e) {
       console.error(e);
@@ -230,25 +224,14 @@ class RecipePage extends Component {
   async UNSAFE_componentWillMount() {
     const recipeId = this.props.match.params.id;
     try {
-      const recipeSnapshot = await database()
-        .ref('recipes')
-        .child(recipeId)
-        .once('value');
+      const recipe = await fetchRecipe(recipeId);
 
-      let recipe = recipeSnapshot.val();
-
-      if (recipe) {
-        recipe = {
-          tags: [],
-          ingredients: [],
-          directions: [],
-          ...recipeSnapshot.val()
-        };
-        console.log('recipe', recipe);
-        this.setState({ recipe, isLoading: false });
-      } else {
+      if (!recipe) {
         throw new Error('recipe does not exist');
       }
+
+      console.log('recipe', recipe);
+      this.setState({ recipe, isLoading: false });
     } catch (e) {
       console.error(e);
       this.setState({ isError: true });

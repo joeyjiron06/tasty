@@ -1,6 +1,5 @@
 import React from 'react';
-// import { mount } from 'enzyme';
-import { unwrap, createMount } from '@material-ui/core/test-utils';
+import { mount } from 'enzyme';
 import BrowsePage from './browse';
 import RecipeCard from '../components/recipeCard.js';
 import { fetchRecipes } from '../api/recipes.js';
@@ -9,7 +8,7 @@ jest.mock('../api/recipes.js');
 
 describe('<BrowsePage />', () => {
   it('should have a title', () => {
-    const browsePage = renderBrowsePage();
+    const browsePage = renderPage();
     expect(browsePage.getTitle()).toBe('Browse Recipes');
   });
 
@@ -35,7 +34,7 @@ describe('<BrowsePage />', () => {
       }
     ]);
     fetchRecipes.mockImplementation(() => promise);
-    const browsePage = renderBrowsePage();
+    const browsePage = renderPage();
     const recipes = await promise;
 
     browsePage.update();
@@ -53,7 +52,7 @@ describe('<BrowsePage />', () => {
   it('should render no results when recipe list is empty', async () => {
     const promise = Promise.resolve([]);
     fetchRecipes.mockImplementation(() => promise);
-    const browsePage = renderBrowsePage();
+    const browsePage = renderPage();
     const recipes = await promise;
 
     browsePage.update();
@@ -66,10 +65,10 @@ describe('<BrowsePage />', () => {
   it('should render an error when error fetching recipes', async () => {
     const promise = Promise.reject(new Error('error fetching recipes'));
     fetchRecipes.mockImplementation(() => promise);
-    const browsePage = renderBrowsePage();
+    const browsePage = renderPage();
 
     try {
-      // will no resolve
+      // will not resolve
       await promise;
     } catch (e) {
       browsePage.update();
@@ -82,15 +81,11 @@ describe('<BrowsePage />', () => {
   });
 });
 
-const renderBrowsePage = props => {
-  const mount = createMount();
+const renderPage = props => {
   const wrapper = mount(<BrowsePage {...props} />);
 
   wrapper.getTitle = () =>
-    wrapper
-      .find('[data-test="browsepage-title"]')
-      .last()
-      .props().children;
+    wrapper.find('[data-test="browsepage-title"] h1').text();
 
   wrapper.findCards = () => wrapper.find(RecipeCard).children();
 
