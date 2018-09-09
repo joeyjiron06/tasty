@@ -13,26 +13,26 @@ const theme = createMuiTheme({});
 const RecipeCard = ({ recipe, className, onClick, classes = {} }) => (
   <MuiThemeProvider theme={theme}>
     <Card
-      className={[classes.card || '', className || ''].join(' ').trim()}
+      className={`${classes.card} ${className || ''}`}
       onClick={onClick}
-      data-test="recipecard-card"
+      data-testid="recipecard"
     >
       <CardMedia
         className={classes.media}
         image={recipe.image || ''}
         title={recipe.title}
-        data-test="recipecard-image"
+        data-testid="recipecard-image"
       />
       <CardContent>
         <Typography
           gutterBottom
           variant="title"
           noWrap={true}
-          data-test="recipecard-title"
+          data-testid="recipecard-title"
         >
           {recipe.title}
         </Typography>
-        <Typography component="p" noWrap={true} data-test="recipecard-tags">
+        <Typography component="p" noWrap={true} data-testid="recipecard-tags">
           {(recipe.tags || []).join(' · ')}
         </Typography>
       </CardContent>

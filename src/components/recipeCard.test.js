@@ -1,9 +1,8 @@
 import React from 'react';
-import { shallow } from 'enzyme';
-import { unwrap } from '@material-ui/core/test-utils';
 import RecipeCard from './recipeCard';
+import { render, fireEvent } from 'react-testing-library';
 
-describe('<RecipeCard />', () => {
+describe('<RecipeCard RTL/>', () => {
   const recipe = {
     image: 'http://image.com',
     title: 'Soba Noodles',
@@ -12,71 +11,58 @@ describe('<RecipeCard />', () => {
 
   describe('render recipe', () => {
     it('should render the image', () => {
-      const recipeCard = renderCard({ recipe });
-      expect(recipeCard.getImageUrl()).toBe(recipe.image);
+      const { getByTestId } = render(<RecipeCard recipe={recipe} />);
+      expect(getByTestId('recipecard-image')).toHaveStyle(
+        `background-image: url(${recipe.image});`
+      );
     });
 
     it('should render the title', () => {
-      const recipeCard = renderCard({ recipe });
-      expect(recipeCard.getTitle()).toBe(recipe.title);
+      const { getByTestId } = render(<RecipeCard recipe={recipe} />);
+      expect(getByTestId('recipecard-title')).toHaveTextContent(recipe.title);
     });
 
     it('should render the tags', () => {
-      const recipeCard = renderCard({ recipe });
-      expect(recipeCard.getTags()).toBe(recipe.tags.join(' · '));
+      const { getByTestId } = render(<RecipeCard recipe={recipe} />);
+      expect(getByTestId('recipecard-tags')).toHaveTextContent(
+        recipe.tags.join(' · ')
+      );
     });
   });
 
   describe('className props', () => {
     it('should not add className if none are given', () => {
-      const recipeCard = renderCard({ recipe });
-      expect(recipeCard.findCard()).toHaveProp({
-        className: ''
-      });
+      const { getByTestId } = render(
+        <RecipeCard recipe={recipe} className={undefined} />
+      );
+
+      expect(getByTestId('recipecard')).not.toHaveClass('undefined');
     });
 
     it('should add className to card', () => {
-      const recipeCard = renderCard({ recipe, className: 'testme' });
-      expect(recipeCard.findCard()).toHaveClassName('testme');
+      const { getByTestId } = render(
+        <RecipeCard recipe={recipe} className="bestClassEver" />
+      );
+
+      expect(getByTestId('recipecard')).toHaveClass('bestClassEver');
     });
   });
 
   describe('onClick', () => {
-    it('shuold pass the onClick function to the card', () => {
-      const onClick = jest.fn();
-      const recipeCard = renderCard({ recipe, onClick });
-      expect(recipeCard.findCard()).toHaveProp({
-        onClick
-      });
-    });
-
     it('should invoke the onClick function when a card is clicked', () => {
       const onClick = jest.fn();
-      const recipeCard = renderCard({ recipe, onClick });
+      const { getByTestId } = render(
+        <RecipeCard recipe={recipe} onClick={onClick} />
+      );
 
-      recipeCard.click();
-
+      fireEvent(
+        getByTestId('recipecard'),
+        new MouseEvent('click', {
+          bubbles: true, // click events must bubble for React to see it
+          cancelable: true
+        })
+      );
       expect(onClick).toHaveBeenCalledTimes(1);
     });
   });
 });
-
-const renderCard = props => {
-  const RecipeCardUnwrapped = unwrap(RecipeCard);
-  const wrapper = shallow(<RecipeCardUnwrapped {...props} />);
-
-  wrapper.getImageUrl = () =>
-    wrapper.find('[data-test="recipecard-image"]').props().image;
-
-  wrapper.getTitle = () =>
-    wrapper.find('[data-test="recipecard-title"]').props().children;
-
-  wrapper.getTags = () =>
-    wrapper.find('[data-test="recipecard-tags"]').props().children;
-
-  wrapper.findCard = () => wrapper.find('[data-test="recipecard-card"]');
-
-  wrapper.click = () => wrapper.findCard().simulate('click');
-
-  return wrapper;
-};
