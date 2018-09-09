@@ -1,254 +1,27 @@
 import React, { Component } from 'react';
-import {
-  Typography,
-  Divider,
-  Icon,
-  TextField,
-  Button,
-  IconButton,
-  CircularProgress
-} from '@material-ui/core';
+import { Typography, Divider, Icon, CircularProgress } from '@material-ui/core';
 import { withStyles } from '@material-ui/core/styles';
-import {
-  fetchRecipe,
-  updateRecipe,
-  moveRecipeToTrash,
-  deleteRecipe
-} from '../api/recipes';
+import { fetchRecipe } from '../api/recipes';
 import * as logger from '../utils/logger';
-
-const copyRecipe = recipe => ({
-  ...recipe,
-  tags: [...recipe.tags],
-  ingredients: [...recipe.ingredients],
-  directions: [...recipe.directions]
-});
 
 class RecipePage extends Component {
   state = {
     isLoading: true,
-    isEditing: false,
     isError: false,
-    recipe: null,
-    editRecipe: null,
-    showEditButton: false
-  };
-
-  handleTitleChanged = event => {
-    const title = event.target.value;
-    const editRecipe = { ...this.state.editRecipe, title };
-    this.setState({ editRecipe });
-  };
-  handleCancelClicked = event => {
-    this.setState({
-      isEditing: false
-    });
-  };
-  handleSaveClicked = async event => {
-    const recipe = copyRecipe(this.state.editRecipe);
-    const recipeId = this.props.match.params.id;
-
-    recipe.ingredients = recipe.ingredients.filter(ing => !!ing);
-    recipe.directions = recipe.directions.filter(dir => !!dir);
-    recipe.tags = recipe.tags.filter(tag => !!tag);
-
-    try {
-      await updateRecipe(recipeId, recipe);
-    } catch (e) {
-      logger.error(e);
-    }
-
-    this.setState({
-      isEditing: false,
-      recipe
-    });
-  };
-
-  handleEditClicked = event => {
-    const editRecipe = copyRecipe(this.state.recipe);
-    this.setState({
-      isEditing: true,
-      editRecipe
-    });
-  };
-  handleDurationValueChanged = event => {
-    const text = event.target.value;
-    const number = text && parseInt(text, 10);
-
-    if (number === undefined) {
-      return;
-    }
-
-    if (number === null) {
-      return;
-    }
-
-    if (isNaN(number)) {
-      return;
-    }
-
-    const editRecipe = {
-      ...this.state.editRecipe
-    };
-    editRecipe.duration = number;
-    this.setState({ editRecipe });
-  };
-
-  handleServesChanged = event => {
-    const serves = event.target.value;
-    const editRecipe = {
-      ...this.state.editRecipe,
-      serves
-    };
-    this.setState({
-      editRecipe
-    });
-  };
-
-  handleRemoveIngredient = ingredient => {
-    return () => {
-      const editRecipe = {
-        ...this.state.editRecipe,
-        ingredients: this.state.editRecipe.ingredients.filter(
-          ing => ing !== ingredient
-        )
-      };
-      this.setState({ editRecipe });
-    };
-  };
-  handleRemoveStep = step => () => {
-    const editRecipe = {
-      ...this.state.editRecipe,
-      directions: this.state.editRecipe.directions.filter(stp => stp !== step)
-    };
-    this.setState({ editRecipe });
-  };
-  handleAddIngredient = () => {
-    const editRecipe = {
-      ...this.state.editRecipe
-    };
-    editRecipe.ingredients.push(null);
-    this.setState({ editRecipe }, () => {
-      const selectedElements = document.querySelectorAll(
-        `.${this.props.classes.ingredientInput}`
-      );
-      if (selectedElements.length) {
-        const inputElement = selectedElements[selectedElements.length - 1];
-        inputElement.focus();
-      }
-    });
-  };
-  handleAddStep = () => {
-    const editRecipe = {
-      ...this.state.editRecipe
-    };
-    editRecipe.directions.push(null);
-    this.setState({ editRecipe }, () => {
-      const selectedElements = document.querySelectorAll(
-        `.${this.props.classes.stepInput}`
-      );
-      if (selectedElements.length) {
-        const inputElement = selectedElements[selectedElements.length - 1];
-        inputElement.focus();
-      }
-    });
-  };
-
-  handleDeleteTag = index => () => {
-    const editRecipe = {
-      ...this.state.editRecipe,
-      tags: this.state.editRecipe.tags.filter((t, idx) => index !== idx)
-    };
-    this.setState({ editRecipe });
-  };
-
-  handleTagChanged = index => event => {
-    const text = event.target.value;
-    const editRecipe = {
-      ...this.state.editRecipe
-    };
-    editRecipe.tags[index] = text;
-    this.setState({ editRecipe });
-  };
-
-  handleStepTextChanged = (step, index) => event => {
-    const newText = event.target.value;
-    const editRecipe = this.state.editRecipe;
-
-    if (newText.includes('\n')) {
-      this.handleAddStep();
-    } else {
-      editRecipe.directions[index] = newText;
-      this.setState({ editRecipe });
-    }
-  };
-
-  handleIngredientChanged = (ingredient, index) => event => {
-    const newText = event.target.value;
-    const editRecipe = this.state.editRecipe;
-    editRecipe.ingredients[index] = newText;
-    this.setState({ editRecipe });
-  };
-  handleAddTag = event => {
-    const editRecipe = {
-      ...this.state.editRecipe
-    };
-    editRecipe.tags.push(null);
-    this.setState({ editRecipe });
-  };
-
-  handleImageChanged = event => {
-    const image = event.target.value;
-    const editRecipe = this.state.editRecipe;
-    editRecipe.image = image;
-    this.setState({ editRecipe });
-  };
-
-  handleDeleteClicked = async event => {
-    const recipeId = this.props.match.params.id;
-
-    try {
-      await moveRecipeToTrash(recipeId);
-      await deleteRecipe(recipeId);
-      this.setState({ recipe: null, isError: true, isEditing: false });
-    } catch (e) {
-      logger.error(e);
-    }
-  };
-
-  handleIngredientKeyDown = event => {
-    if (event.target.value && event.keyCode === 13) {
-      this.handleAddIngredient();
-    }
+    recipe: null
   };
 
   async UNSAFE_componentWillMount() {
-    const recipeId = this.props.match.params.id;
-    const locationState = this.props.location.state || {};
+    const { match, location } = this.props;
+    const recipeId = match && match.params.id;
+    const recipeFromState = location && location.state && location.state.recipe;
 
     try {
-      const recipe = locationState.recipe || (await fetchRecipe(recipeId));
-
-      if (!recipe) {
-        throw new Error('recipe does not exist');
-      }
-
-      const user = JSON.parse(localStorage.getItem('user'));
-      const isEditMode = locationState.editMode;
-      const showEditButton = user && user.isAdmin;
-
-      this.setState(
-        {
-          recipe,
-          isLoading: false,
-          showEditButton
-        },
-        () => {
-          if (isEditMode && showEditButton) {
-            this.handleEditClicked();
-          }
-        }
-      );
+      const recipe = recipeFromState || (await fetchRecipe(recipeId));
+      this.setState({
+        recipe,
+        isLoading: false
+      });
     } catch (e) {
       logger.error(e);
       this.setState({ isError: true });
@@ -257,14 +30,7 @@ class RecipePage extends Component {
 
   render() {
     const { classes } = this.props;
-    const {
-      isError,
-      isLoading,
-      isEditing,
-      recipe,
-      editRecipe,
-      showEditButton
-    } = this.state;
+    const { isError, isLoading, recipe } = this.state;
 
     if (isError) {
       return (
@@ -279,275 +45,94 @@ class RecipePage extends Component {
     if (isLoading) {
       return (
         <div className={classes.page}>
-          <CircularProgress />
+          <CircularProgress data-testid="recipepage-loading-indicator" />
         </div>
       );
     }
 
     return (
       <div className={classes.page}>
-        <div className={classes.editContainer}>
-          {isEditing ? (
-            <div>
-              <Button
-                variant="contained"
-                color="default"
-                className={classes.cancelButton}
-                onClick={this.handleCancelClicked}
-              >
-                <Icon className={classes.buttonIcon}>close</Icon>
-                Cancel
-              </Button>
-
-              <Button
-                variant="contained"
-                color="secondary"
-                onClick={this.handleDeleteClicked}
-                className={classes.deleteButton}
-              >
-                <Icon className={classes.buttonIcon}>delete</Icon>
-                Delete
-              </Button>
-
-              <Button
-                variant="contained"
-                color="secondary"
-                onClick={this.handleSaveClicked}
-              >
-                <Icon className={classes.buttonIcon}>check</Icon>
-                Save
-              </Button>
-            </div>
-          ) : (
-            showEditButton && (
-              <Button
-                variant="contained"
-                color="secondary"
-                onClick={this.handleEditClicked}
-              >
-                <Icon className={classes.buttonIcon}>edit</Icon>
-                Edit
-              </Button>
-            )
-          )}
-        </div>
-
         <div className={classes.infoContainer}>
-          {isEditing ? (
-            <TextField
-              value={editRecipe.title || ''}
-              fullWidth={true}
-              onChange={this.handleTitleChanged}
-              margin="normal"
-              InputProps={{
-                classes: {
-                  input: classes.titleInput
-                }
-              }}
-            />
-          ) : (
-            <Typography variant="display3" className={classes.title}>
-              {recipe.title}
-            </Typography>
-          )}
+          <Typography
+            variant="display3"
+            className={classes.title}
+            data-testid="recipepage-title"
+          >
+            {recipe.title}
+          </Typography>
 
-          {isEditing ? null : <Divider className={classes.titleDivider} />}
+          <Divider className={classes.titleDivider} />
 
           <div className={classes.subtitleContainer}>
             <div className={classes.timeAndServicesContainer}>
               <div className={classes.timeContainer}>
                 <Icon className={classes.icon}>access_time</Icon>
-                {isEditing ? (
-                  <div className={classes.timeInputContainer}>
-                    <TextField
-                      value={editRecipe.duration || ''}
-                      onChange={this.handleDurationValueChanged}
-                      margin="normal"
-                      InputProps={{
-                        classes: {
-                          input: classes.durationValueInput
-                        }
-                      }}
-                    />
-                    <div className={classes.timeLabel}>mins</div>
-                  </div>
-                ) : (
-                  <div>{`${recipe.duration} mins`}</div>
-                )}
+                <div data-testid="recipepage-duration">{`${
+                  recipe.duration
+                } mins`}</div>
               </div>
 
               <div className={classes.servingsContainer}>
                 <Icon className={classes.icon}>people_outline</Icon>
-                {isEditing ? (
-                  <TextField
-                    value={editRecipe.serves || ''}
-                    onChange={this.handleServesChanged}
-                    margin="normal"
-                    InputProps={{
-                      classes: {
-                        input: classes.servesInput
-                      }
-                    }}
-                  />
-                ) : (
-                  <Typography className={classes.servingsText}>
-                    {recipe.serves}
-                  </Typography>
-                )}
+                <Typography
+                  className={classes.servingsText}
+                  data-testid="recipepage-serves"
+                >
+                  {recipe.serves}
+                </Typography>
               </div>
             </div>
 
             <div className={classes.tagsContainer}>
-              {isEditing
-                ? editRecipe.tags.map((tag, index) => (
-                    <div
-                      key={index}
-                      className={classes.chip + ' ' + classes.chipEditing}
-                    >
-                      <IconButton onClick={this.handleDeleteTag(index)}>
-                        <Icon>cancel</Icon>
-                      </IconButton>
-                      <TextField
-                        value={tag || ''}
-                        onChange={this.handleTagChanged(index)}
-                      />
-                    </div>
-                  ))
-                : (recipe.tags || []).map(tag => (
-                    <div key={tag} className={classes.chip}>
-                      {tag}
-                    </div>
-                  ))}
-
-              {isEditing ? (
-                <Button
-                  color="secondary"
-                  variant="contained"
-                  onClick={this.handleAddTag}
-                  className={classes.addTagButton}
+              {(recipe.tags || []).map(tag => (
+                <div
+                  key={tag}
+                  className={classes.chip}
+                  data-testid="recipepage-tag"
                 >
-                  <Icon className={classes.buttonIcon}>add</Icon>
-                  Add tag
-                </Button>
-              ) : null}
+                  {tag}
+                </div>
+              ))}
             </div>
           </div>
 
           <div className={classes.contentsContainer}>
             <div className={classes.ingredients}>
-              <Typography
-                variant="title"
-                gutterBottom
-                className={isEditing ? classes.ingredientsTitleEditing : null}
-              >
+              <Typography variant="title" gutterBottom>
                 Ingredients
               </Typography>
               <div>
-                {isEditing
-                  ? editRecipe.ingredients.map((ingredient, index) => (
-                      <div
-                        key={index}
-                        className={classes.editIngredientContainer}
-                      >
-                        <Typography className={classes.ingredient}>
-                          <IconButton
-                            onClick={this.handleRemoveIngredient(ingredient)}
-                          >
-                            <Icon>cancel</Icon>
-                          </IconButton>
-                        </Typography>
-                        <TextField
-                          value={ingredient || ''}
-                          onChange={this.handleIngredientChanged(
-                            ingredient,
-                            index
-                          )}
-                          onKeyDown={this.handleIngredientKeyDown}
-                          margin="normal"
-                          InputProps={{
-                            classes: {
-                              input: classes.ingredientInput
-                            }
-                          }}
-                        />
-                      </div>
-                    ))
-                  : recipe.ingredients.map(ingredient => (
-                      <Typography
-                        key={ingredient}
-                        className={classes.ingredient}
-                      >
-                        {ingredient}
-                      </Typography>
-                    ))}
-
-                {isEditing ? (
-                  <Button
-                    color="secondary"
-                    variant="contained"
-                    onClick={this.handleAddIngredient}
+                {recipe.ingredients.map(ingredient => (
+                  <Typography
+                    key={ingredient}
+                    className={classes.ingredient}
+                    data-testid="recipepage-ingredient"
                   >
-                    <Icon className={classes.buttonIcon}>add</Icon>
-                    Add Ingredient
-                  </Button>
-                ) : null}
+                    {ingredient}
+                  </Typography>
+                ))}
               </div>
             </div>
 
             <div className={classes.directions}>
-              <Typography
-                variant="title"
-                gutterBottom
-                className={isEditing ? classes.directionsTitleEditing : null}
-              >
+              <Typography variant="title" gutterBottom>
                 Directions
               </Typography>
               <div className={classes.directionsList}>
-                {isEditing
-                  ? editRecipe.directions.map((step, index) => (
-                      <div key={index} className={classes.directionStep}>
-                        <IconButton onClick={this.handleRemoveStep(step)}>
-                          <Icon>cancel</Icon>
-                        </IconButton>
-
-                        <Typography className={classes.directionNumberEditing}>
-                          {index + 1}
-                        </Typography>
-                        <TextField
-                          className={classes.directionTextEditing}
-                          fullWidth={true}
-                          multiline={true}
-                          value={step || ''}
-                          onChange={this.handleStepTextChanged(step, index)}
-                          InputProps={{
-                            classes: {
-                              input: classes.stepInput
-                            }
-                          }}
-                        />
-                      </div>
-                    ))
-                  : recipe.directions.map((step, index) => (
-                      <div key={step} className={classes.directionStep}>
-                        <Typography className={classes.directionNumber}>
-                          {index + 1}
-                        </Typography>
-                        <Typography className={classes.directionText}>
-                          {step}
-                        </Typography>
-                      </div>
-                    ))}
-
-                {isEditing ? (
-                  <Button
-                    color="secondary"
-                    variant="contained"
-                    onClick={this.handleAddStep}
+                {recipe.directions.map((step, index) => (
+                  <div
+                    key={step}
+                    className={classes.directionStep}
+                    data-testid="recipepage-direction"
                   >
-                    <Icon className={classes.buttonIcon}>add</Icon>
-                    Add Step
-                  </Button>
-                ) : null}
+                    <Typography className={classes.directionNumber}>
+                      {index + 1}
+                    </Typography>
+                    <Typography className={classes.directionText}>
+                      {step}
+                    </Typography>
+                  </div>
+                ))}
               </div>
             </div>
           </div>
@@ -556,19 +141,10 @@ class RecipePage extends Component {
         <div className={classes.imageContainer}>
           <img
             className={classes.image}
-            src={isEditing ? editRecipe.image : recipe.image}
+            src={recipe.image}
             alt="recipe"
+            data-testid="recipepage-image"
           />
-          {isEditing ? (
-            <div className={classes.imageUrl}>
-              <TextField
-                label="Image"
-                fullWidth={true}
-                value={editRecipe.image || ''}
-                onChange={this.handleImageChanged}
-              />
-            </div>
-          ) : null}
         </div>
       </div>
     );
@@ -585,20 +161,7 @@ const styles = theme => ({
     },
     color: 'white'
   },
-  editContainer: {
-    display: 'flex',
-    justifyContent: 'flex-end',
-    position: 'absolute',
-    width: '100%',
-    paddingRight: 20,
-    zIndex: 2
-  },
-  buttonIcon: {
-    marginRight: 10
-  },
-  cancelButton: {
-    marginRight: 10
-  },
+
   infoContainer: {
     flex: 1,
     padding: 50,
@@ -613,22 +176,13 @@ const styles = theme => ({
   title: {
     letterSpacing: 2.8
   },
-  titleInput: {
-    color: theme.typography.display3.color,
-    fontSize: theme.typography.display3.fontSize
-  },
-  timeLabel: {
-    marginLeft: 10,
-    marginBottom: 4
-  },
+
   titleDivider: {
     [theme.breakpoints.down('sm')]: {
       background: 'rgba(255,255,255,0.12)'
     }
   },
-  servesInput: {
-    maxWidth: 30
-  },
+
   subtitleContainer: {
     display: 'flex',
     alignItems: 'center',
@@ -639,13 +193,7 @@ const styles = theme => ({
     display: 'inline-block',
     marginRight: 10
   },
-  timeInputContainer: {
-    display: 'flex',
-    alignItems: 'flex-end'
-  },
-  durationValueInput: {
-    maxWidth: 30
-  },
+
   servingsContainer: {
     display: 'flex',
     alignItems: 'center'
@@ -678,21 +226,13 @@ const styles = theme => ({
     marginRight: 10,
     borderRadius: 100
   },
-  chipEditing: {
-    marginRight: 10
-  },
+
   ingredients: {
     marginBottom: 40,
     marginRight: 40,
     flexShrink: 0
   },
-  editIngredientContainer: {
-    display: 'flex',
-    alignItems: 'center'
-  },
-  ingredientsTitleEditing: {
-    marginLeft: 48
-  },
+
   ingredient: {
     marginBottom: 10
   },
@@ -700,9 +240,7 @@ const styles = theme => ({
     flexGrow: 1,
     flexBasis: 360
   },
-  directionsTitleEditing: {
-    marginLeft: 48
-  },
+
   directionsList: {},
   directionStep: {
     display: 'flex',
@@ -712,19 +250,11 @@ const styles = theme => ({
     minWidth: 28,
     display: 'inline'
   },
-  directionNumberEditing: {
-    minWidth: 28,
-    display: 'inline',
-    marginTop: 10
-  },
+
   directionText: {
     display: 'inline'
   },
-  directionTextEditing: {
-    display: 'inline',
-    marginTop: 10,
-    flexGrow: 1
-  },
+
   contentsContainer: {
     display: 'flex',
     flexWrap: 'wrap'
@@ -765,15 +295,7 @@ const styles = theme => ({
     [theme.breakpoints.down('sm')]: {
       bottom: 20
     }
-  },
-  addTagButton: {
-    maxHeight: 42
-  },
-  deleteButton: {
-    marginRight: 10
-  },
-  ingredientInput: {},
-  stepInput: {}
+  }
 });
 
 export default withStyles(styles)(RecipePage);
