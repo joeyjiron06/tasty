@@ -741,7 +741,8 @@ const styles = theme => ({
       left: 0,
       width: '100%',
       background: 'rgba(0,0,0,0.7)',
-      padding: 0
+      padding: 0,
+      zIndex: -1
     }
   },
   image: {
