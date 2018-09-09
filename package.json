@@ -19,7 +19,8 @@
     "build": "react-scripts build",
     "test": "react-scripts test --env=jsdom",
     "eject": "react-scripts eject",
-    "prepush": "eslint src/**/*.js"
+    "lint": "eslint src/**/*.js",
+    "prepush": "npm run lint"
   },
   "devDependencies": {
     "babel-eslint": "^8.2.6",
