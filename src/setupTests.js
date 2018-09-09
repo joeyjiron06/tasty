@@ -1,16 +1,14 @@
-import { configure } from 'enzyme';
-import Adapter from 'enzyme-adapter-react-16';
 import { jsdom } from 'jsdom';
-// setup enzyme with jest
-import 'jest-enzyme';
 // this adds custom jest matchers from jest-dom
 import 'jest-dom/extend-expect';
 // this is basically: afterEach(cleanup)
 import 'react-testing-library/cleanup-after-each';
+import { disableAll } from './utils/logger';
 
-configure({ adapter: new Adapter() });
+// disable logging
+disableAll();
 
-// configure jsdom to be able to "mount" with enzyme
+// configure jsdom to be able to "render" with react-testing-library
 if (!global.window) {
   const dom = new jsdom('<!doctype html><html><body></body></html>');
   const { defaultView } = dom;

@@ -2,6 +2,7 @@ import React, { Component } from 'react';
 import { MuiThemeProvider, createMuiTheme } from '@material-ui/core/styles';
 import Routes from './routes';
 import { initializeApp } from 'firebase';
+import * as logger from './utils/logger';
 
 const theme = createMuiTheme({
   palette: {
@@ -20,6 +21,8 @@ class App extends Component {
       storageBucket: '',
       messagingSenderId: '145178868001'
     });
+
+    logger.enableAll();
   }
 
   render() {

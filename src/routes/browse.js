@@ -3,6 +3,7 @@ import { withStyles } from '@material-ui/core/styles';
 import { Typography, CircularProgress } from '@material-ui/core';
 import { fetchRecipes } from '../api/recipes';
 import RecipeCard from '../components/recipeCard';
+import * as logger from '../utils/logger';
 
 class BrowsePage extends Component {
   state = {
@@ -28,7 +29,7 @@ class BrowsePage extends Component {
         isLoading: false
       });
     } catch (e) {
-      console.error(e);
+      logger.error(e);
       this.setState({
         error: true,
         isLoading: false
@@ -45,7 +46,7 @@ class BrowsePage extends Component {
         <Typography
           variant="display2"
           gutterBottom
-          data-test="browsepage-title"
+          data-testid="browsepage-title"
           className={classes.title}
         >
           Browse Recipes
@@ -54,25 +55,17 @@ class BrowsePage extends Component {
         <div className={classes.recipesGrid}>
           {(() => {
             if (error) {
-              return (
-                <Typography data-test="browsepage-error">
-                  Error fetching recipes
-                </Typography>
-              );
+              return <Typography>Error fetching recipes</Typography>;
             }
 
             if (isLoading) {
               return (
-                <CircularProgress data-test="browsepage-loading-indicator" />
+                <CircularProgress data-testid="browsepage-loading-indicator" />
               );
             }
 
             if (!recipes || !recipes.length) {
-              return (
-                <Typography data-test="browsepage-no-results">
-                  No Results
-                </Typography>
-              );
+              return <Typography>No Results</Typography>;
             }
 
             return recipes.map(recipe => (

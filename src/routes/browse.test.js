@@ -1,19 +1,19 @@
 import React from 'react';
-import { mount } from 'enzyme';
 import BrowsePage from './browse';
-import RecipeCard from '../components/recipeCard.js';
-import { fetchRecipes } from '../api/recipes.js';
+import { fetchRecipes } from '../api/recipes';
+import { render, waitForElement } from 'react-testing-library';
 
 jest.mock('../api/recipes.js');
 
 describe('<BrowsePage />', () => {
   it('should have a title', () => {
-    const browsePage = renderPage();
-    expect(browsePage.getTitle()).toBe('Browse Recipes');
+    const { getByTestId } = render(<BrowsePage />);
+
+    expect(getByTestId('browsepage-title')).toHaveTextContent('Browse Recipes');
   });
 
   it('should render the fetched recipes', async () => {
-    const promise = Promise.resolve([
+    const recipes = [
       {
         id: 0,
         title: 'Soba Noodles',
@@ -32,82 +32,46 @@ describe('<BrowsePage />', () => {
         image: 'http://image.com',
         tags: ['Dinner', 'Dumplings']
       }
-    ]);
-    fetchRecipes.mockImplementation(() => promise);
-    const browsePage = renderPage();
-    const recipes = await promise;
+    ];
+    fetchRecipes.mockImplementation(() => Promise.resolve(recipes));
 
-    browsePage.update();
-
-    const recipeCards = browsePage.findCards();
+    const { getAllByTestId } = render(<BrowsePage />);
+    const recipeCards = await waitForElement(() =>
+      getAllByTestId('recipecard')
+    );
 
     expect(recipeCards).toHaveLength(recipes.length);
-
-    recipes.forEach((recipe, index) => {
-      const recipeProp = recipeCards.at(index).props().recipe;
-      expect(recipeProp).toEqual(recipe);
-    });
   });
 
   it('should render no results when recipe list is empty', async () => {
-    const promise = Promise.resolve([]);
-    fetchRecipes.mockImplementation(() => promise);
-    const browsePage = renderPage();
-    await promise;
+    fetchRecipes.mockImplementation(() => Promise.resolve([]));
 
-    browsePage.update();
-    const noResultsContainer = browsePage.getNoResultsContainer();
+    const { getByText } = render(<BrowsePage />);
+    const noResultsEl = await waitForElement(() => getByText('No Results'));
 
-    expect(noResultsContainer).toExist();
-    expect(noResultsContainer.text()).toBe('No Results');
+    expect(noResultsEl).toBeInTheDocument();
   });
 
   it('should render an error when error fetching recipes', async () => {
-    const promise = Promise.reject(new Error('error fetching recipes'));
-    fetchRecipes.mockImplementation(() => promise);
-    const browsePage = renderPage();
+    fetchRecipes.mockImplementation(() =>
+      Promise.reject(new Error('test error'))
+    );
 
-    try {
-      // will not resolve
-      await promise;
-    } catch (e) {
-      browsePage.update();
+    const { getByText } = render(<BrowsePage />);
+    const errorEl = await waitForElement(() =>
+      getByText('Error fetching recipes')
+    );
 
-      const errorContainer = browsePage.getErrorContainer();
-
-      expect(errorContainer).toExist();
-      expect(errorContainer.text()).toBe('Error fetching recipes');
-    }
+    expect(errorEl).toBeInTheDocument();
   });
 
   it('should render a loading circle when loading', async () => {
-    const promise = new Promise(resolve => setTimeout(resolve, 750));
-    fetchRecipes.mockImplementation(() => promise);
+    fetchRecipes.mockImplementation(
+      () => new Promise(resolve => setTimeout(resolve, 750))
+    );
 
-    const browsePage = renderPage();
+    const { getByTestId } = render(<BrowsePage />);
 
-    const loadingIndicator = browsePage.findLoadingIndicator();
-    expect(loadingIndicator).toExist();
-    await promise;
+    expect(getByTestId('browsepage-loading-indicator')).toBeInTheDocument();
   });
 });
-
-const renderPage = props => {
-  const wrapper = mount(<BrowsePage {...props} />);
-
-  wrapper.getTitle = () =>
-    wrapper.find('[data-test="browsepage-title"] h1').text();
-
-  wrapper.findCards = () => wrapper.find(RecipeCard).children();
-
-  wrapper.getNoResultsContainer = () =>
-    wrapper.find('[data-test="browsepage-no-results"] p');
-
-  wrapper.getErrorContainer = () =>
-    wrapper.find('[data-test="browsepage-error"] p');
-
-  wrapper.findLoadingIndicator = () =>
-    wrapper.find('[data-test="browsepage-loading-indicator"]');
-
-  return wrapper;
-};

@@ -15,6 +15,7 @@ import {
   moveRecipeToTrash,
   deleteRecipe
 } from '../api/recipes';
+import * as logger from '../utils/logger';
 
 const copyRecipe = recipe => ({
   ...recipe,
@@ -54,7 +55,7 @@ class RecipePage extends Component {
     try {
       await updateRecipe(recipeId, recipe);
     } catch (e) {
-      console.error(e);
+      logger.error(e);
     }
 
     this.setState({
@@ -211,7 +212,7 @@ class RecipePage extends Component {
       await deleteRecipe(recipeId);
       this.setState({ recipe: null, isError: true, isEditing: false });
     } catch (e) {
-      console.error(e);
+      logger.error(e);
     }
   };
 
@@ -249,7 +250,7 @@ class RecipePage extends Component {
         }
       );
     } catch (e) {
-      console.error(e);
+      logger.error(e);
       this.setState({ isError: true });
     }
   }

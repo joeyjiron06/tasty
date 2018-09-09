@@ -14,6 +14,7 @@ import {
   CardContent
 } from '@material-ui/core';
 import { blue } from '@material-ui/core/colors';
+import * as logger from '../utils/logger';
 
 import {
   addRecipe,
@@ -61,7 +62,7 @@ class AdminPage extends Component {
         user
       });
     } catch (e) {
-      console.error('error loggin in', e);
+      logger.error('error loggin in', e);
     }
   };
 
@@ -75,7 +76,7 @@ class AdminPage extends Component {
         }
       });
     } catch (e) {
-      console.log('error', e);
+      logger.log('error', e);
     }
   };
 
@@ -98,7 +99,7 @@ class AdminPage extends Component {
         }
       });
     } catch (e) {
-      console.error(e);
+      logger.error(e);
       this.setState({
         trash: {
           ...this.state.trash,
