@@ -2,7 +2,7 @@ import React from 'react';
 import RecipeCard from './recipeCard';
 import { render, fireEvent } from 'react-testing-library';
 
-describe('<RecipeCard RTL/>', () => {
+describe('<RecipeCard />', () => {
   const recipe = {
     image: 'http://image.com',
     title: 'Soba Noodles',

@@ -14,7 +14,7 @@ import {
   CardContent
 } from '@material-ui/core';
 import { blue } from '@material-ui/core/colors';
-import * as logger from '../utils/logger';
+import * as logger from '../../utils/logger';
 
 import {
   addRecipe,

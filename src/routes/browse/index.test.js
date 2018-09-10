@@ -1,9 +1,9 @@
 import React from 'react';
-import BrowsePage from './browse';
-import { fetchRecipes } from '../api/recipes';
+import BrowsePage from './index';
+import { fetchRecipes } from '../../api/recipes';
 import { render, waitForElement } from 'react-testing-library';
 
-jest.mock('../api/recipes.js');
+jest.mock('../../api/recipes.js');
 
 describe('<BrowsePage />', () => {
   it('should have a title', () => {

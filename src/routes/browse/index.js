@@ -1,9 +1,9 @@
 import React, { Component } from 'react';
 import { withStyles } from '@material-ui/core/styles';
 import { Typography, CircularProgress } from '@material-ui/core';
-import { fetchRecipes } from '../api/recipes';
-import RecipeCard from '../components/recipeCard';
-import * as logger from '../utils/logger';
+import { fetchRecipes } from '../../api/recipes';
+import RecipeCard from './recipeCard';
+import * as logger from '../../utils/logger';
 
 class BrowsePage extends Component {
   state = {
