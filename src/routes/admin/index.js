@@ -13,16 +13,20 @@ import {
   CardMedia,
   CardContent
 } from '@material-ui/core';
-import { blue } from '@material-ui/core/colors';
-import * as logger from '../../utils/logger';
-
+import { blue, red } from '@material-ui/core/colors';
 import {
   addRecipe,
   authUser,
   fetchTrash,
   checkReturingUser,
-  deleteFromTrash
-} from '../api/recipes';
+  deleteFromTrash,
+  updateRecipe,
+  fetchRecipes,
+  deleteRecipe
+} from '../../api/recipes';
+import * as logger from '../../utils/logger';
+import EditRecipeCard from './editRecipeCard';
+import RecipePreviewCard from './recipePreviewCard';
 
 const theme = createMuiTheme({
   palette: {
@@ -39,6 +43,8 @@ class AdminPage extends Component {
   async UNSAFE_componentWillMount() {
     try {
       const user = await checkReturingUser();
+      this.loadRecipes();
+      this.loadTrash();
       localStorage.setItem('user', JSON.stringify(user));
       this.setState({ user, isLoading: false });
     } catch (e) {
@@ -66,21 +72,57 @@ class AdminPage extends Component {
     }
   };
 
-  handleAddNewButton = async event => {
+  handleAddRecipe = async event => {
     try {
-      const newRecipeId = await addRecipe();
-      this.props.history.push({
-        pathname: `/recipe/${newRecipeId}`,
-        state: {
-          allowEditMode: true
-        }
+      const recipe = {
+        title: '',
+        image: '',
+        serves: 0,
+        duration: 0,
+        tags: [],
+        ingredients: [],
+        directions: []
+      };
+
+      this.setState({
+        editRecipe: recipe
       });
     } catch (e) {
       logger.log('error', e);
     }
   };
 
-  handleShowTrash = async () => {
+  loadRecipes = async () => {
+    this.setState({
+      recipes: {
+        isLoading: true,
+        error: false,
+        items: null
+      }
+    });
+
+    try {
+      const recipes = await fetchRecipes();
+      this.setState({
+        recipes: {
+          ...this.state.recipes,
+          isLoading: false,
+          items: recipes.reverse()
+        }
+      });
+    } catch (e) {
+      logger.error(e);
+      this.setState({
+        recipes: {
+          ...this.state.recipes,
+          isLoading: false,
+          error: true
+        }
+      });
+    }
+  };
+
+  loadTrash = async () => {
     this.setState({
       trash: {
         isLoading: true,
@@ -110,23 +152,15 @@ class AdminPage extends Component {
     }
   };
 
-  handleDeleteRecipe = recipe => async () => {
-    await deleteFromTrash(recipe.id);
-    await this.handleShowTrash();
-  };
-
-  handleEditRecipe = recipe => () => {
-    this.props.history.push({
-      pathname: `/recipe/${recipe.id}`,
-      state: {
-        recipe
-      }
+  handleEditRecipe = recipe => {
+    this.setState({
+      editRecipe: recipe
     });
   };
 
   render() {
     const { classes } = this.props;
-    const { user, trash, isLoading } = this.state;
+    const { user, trash, recipes, isLoading, editRecipe } = this.state;
 
     if (!user) {
       return (
@@ -138,8 +172,8 @@ class AdminPage extends Component {
           )}
 
           <Button
-            variant="contained"
-            color="secondary"
+            variant='contained'
+            color='secondary'
             className={classes.loginButton}
             onClick={this.handleLogin}
             disabled={isLoading}
@@ -153,7 +187,7 @@ class AdminPage extends Component {
     if (!user.isAdmin) {
       return (
         <div className={classes.adminPage}>
-          <Typography variant="display1">Admin Page</Typography>
+          <Typography variant='display1'>Admin Page</Typography>
           <Typography>
             Give admin your id if you want admin privilages
           </Typography>
@@ -162,28 +196,84 @@ class AdminPage extends Component {
       );
     }
 
+    // https://photos.app.goo.gl/DjkVHV7dSyQhuaSGA
     return (
       <div className={classes.adminPage}>
-        <Typography variant="display1">Admin Page</Typography>
+        <Typography variant='display1'>Admin Page</Typography>
 
+        {editRecipe && (
+          <EditRecipeCard
+            recipe={editRecipe}
+            onCancel={() => {
+              this.setState({ editRecipe: null });
+            }}
+            onSave={recipe => {
+              if (!recipe.id) {
+                addRecipe(recipe);
+              } else {
+                updateRecipe(recipe.id, recipe);
+              }
+              this.setState({ editRecipe: null });
+            }}
+            onDelete={() => {}}
+          />
+        )}
         <Button
           className={classes.button}
-          onClick={this.handleAddNewButton}
-          color="secondary"
-          variant="contained"
+          onClick={this.handleAddRecipe}
+          color='secondary'
+          variant='contained'
         >
           New recipe
         </Button>
 
-        <Button
-          className={classes.button}
-          onClick={this.handleShowTrash}
-          color="secondary"
-          variant="contained"
-        >
-          Show Trash
-        </Button>
+        <Typography variant='title' gutterBottom className={classes.listTitle}>
+          All Recipes
+        </Typography>
 
+        {(() => {
+          if (!recipes) {
+            return;
+          }
+
+          if (recipes.error) {
+            return (
+              <div onClick={this.handleLoadRecipes}>
+                Error loading recipes. Click to reload
+              </div>
+            );
+          }
+
+          if (recipes.isLoading) {
+            return <CircularProgress className={classes.loadingIndicator} />;
+          }
+
+          if (!recipes.items.length) {
+            return <div>No results</div>;
+          }
+
+          return (
+            <div className={classes.recipePreviewList}>
+              {recipes.items.map(recipe => (
+                <RecipePreviewCard
+                  key={recipe.id}
+                  recipe={recipe}
+                  onDelete={async () => {
+                    await deleteRecipe(recipe.id);
+                    await this.loadRecipes();
+                  }}
+                  onEdit={() => {
+                    this.handleEditRecipe(recipe);
+                  }}
+                />
+              ))}
+            </div>
+          );
+        })()}
+
+        <Typography variant='title' gutterBottom className={classes.listTitle}>
+          Trash
+        </Typography>
         {(() => {
           if (!trash) {
             return;
@@ -206,47 +296,22 @@ class AdminPage extends Component {
           }
 
           return (
-            <MuiThemeProvider theme={theme}>
-              <div className={classes.trashContainer}>
-                {trash.items.map(recipe => (
-                  <Card className={classes.trashCard} key={recipe.id}>
-                    <CardMedia
-                      className={classes.trashCardImage}
-                      image={recipe.image || 'nothinghere'}
-                      title={recipe.title || 'recipe'}
-                    />
-                    <CardContent>
-                      <Typography
-                        gutterBottom
-                        variant="headline"
-                        component="h2"
-                      >
-                        {recipe.title || 'No title'}
-                      </Typography>
-                      <Typography component="p">
-                        {recipe.id || 'No id'}
-                      </Typography>
-                    </CardContent>
-                    <CardActions>
-                      <Button
-                        size="small"
-                        color="primary"
-                        onClick={this.handleDeleteRecipe(recipe)}
-                      >
-                        Delete
-                      </Button>
-                      <Button
-                        size="small"
-                        color="primary"
-                        onClick={this.handleEditRecipe(recipe)}
-                      >
-                        Edit
-                      </Button>
-                    </CardActions>
-                  </Card>
-                ))}
-              </div>
-            </MuiThemeProvider>
+            <div className={classes.recipePreviewList}>
+              {trash.items.map(recipe => (
+                <RecipePreviewCard
+                  key={recipe.id}
+                  recipe={recipe}
+                  onDelete={async () => {
+                    await deleteFromTrash(recipe.id);
+                    await this.loadTrash();
+                  }}
+                  onEdit={() => {
+                    this.handleEditRecipe(recipe);
+                    this.loadRecipes();
+                  }}
+                />
+              ))}
+            </div>
           );
         })()}
       </div>
@@ -256,7 +321,8 @@ class AdminPage extends Component {
 
 const styles = theme => ({
   adminPage: {
-    padding: 40
+    padding: 40,
+    color: 'white'
   },
   input: {
     display: 'block'
@@ -275,19 +341,13 @@ const styles = theme => ({
     marginBottom: 20,
     color: 'white'
   },
-  trashContainer: {
-    display: 'flex',
-    flexWrap: 'wrap',
-    marginTop: 40
+  listTitle: {
+    marginBottom: 10
   },
-  trashCard: {
-    width: 220,
-    marginRight: 20,
-    marginBottom: 20
-  },
-  trashCardImage: {
-    minHeight: 100,
-    backgroundColor: 'grey'
+  recipePreviewList: {
+    overflowX: 'auto',
+    whiteSpace: 'nowrap',
+    marginBottom: 40
   }
 });
 

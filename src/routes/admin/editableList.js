@@ -25,7 +25,7 @@ const EditableList = ({
           <TextField
             autoFocus={!text && index === items.length - 1}
             placeholder={placeholder}
-            value={text}
+            value={text || ''}
             fullWidth={true}
             className={textClassName}
             onChange={e => {
@@ -85,8 +85,7 @@ EditableList.propTypes = {
   placeholder: PropTypes.string,
   onChange: PropTypes.func.isRequired,
   buttonText: PropTypes.string,
-  textClassName: PropTypes.string.value,
-  onEnterPressed: PropTypes.fn
+  textClassName: PropTypes.string
 };
 
 EditableList.defaultTypes = {
