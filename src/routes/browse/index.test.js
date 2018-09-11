@@ -18,19 +18,31 @@ describe('<BrowsePage />', () => {
         id: 0,
         title: 'Soba Noodles',
         image: 'http://image.com',
-        tags: ['Dinner', 'Noodles']
+        tags: ['Dinner', 'Noodles'],
+        ingredients: [],
+        directions: [],
+        serves: 1,
+        duration: 20
       },
       {
         id: 1,
         title: 'Miso Soup',
         image: 'http://image.com',
-        tags: ['Dinner', 'Soup']
+        tags: ['Dinner', 'Soup'],
+        ingredients: [],
+        directions: [],
+        serves: 1,
+        duration: 20
       },
       {
         id: 2,
         title: 'Gyoza',
         image: 'http://image.com',
-        tags: ['Dinner', 'Dumplings']
+        tags: ['Dinner', 'Dumplings'],
+        ingredients: [],
+        directions: [],
+        serves: 1,
+        duration: 20
       }
     ];
     fetchRecipes.mockImplementation(() => Promise.resolve(recipes));

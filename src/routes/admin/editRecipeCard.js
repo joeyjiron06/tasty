@@ -1,5 +1,7 @@
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
+import { withStyles } from '@material-ui/core/styles';
+import { Typography, TextField } from '@material-ui/core';
 import { RecipeType } from '../../utils/types';
 import EditableList from './editableList';
 
@@ -14,7 +16,21 @@ class EditRecipeCard extends Component {
 
     return (
       <div>
-        <input
+        <Typography variant='display1' gutterBottom>
+          Edit Recipe
+        </Typography>
+
+        <TextField
+          onChange={e => {
+            const { value } = e.target;
+            recipe.title = value;
+            this.setState({ recipe });
+          }}
+          placeholder='Name of Recipe'
+          value={recipe.title}
+        />
+
+        {/* <input
           placeholder='Name of Recipe'
           value={recipe.title}
           onChange={e => {
@@ -22,7 +38,7 @@ class EditRecipeCard extends Component {
             recipe.title = value;
             this.setState({ recipe });
           }}
-        />
+        /> */}
         <input
           placeholder='How many does it serve?'
           value={recipe.serves}
@@ -129,4 +145,6 @@ EditRecipeCard.propTypes = {
   onSave: PropTypes.func.isRequired
 };
 
-export default EditRecipeCard;
+const styles = theme => ({});
+
+export default withStyles(styles)(EditRecipeCard);

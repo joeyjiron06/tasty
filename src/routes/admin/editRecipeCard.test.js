@@ -19,7 +19,14 @@ describe('<EditRecipeCard />', () => {
       getAllByPlaceholderText,
       getByAltText,
       getByText
-    } = render(<EditRecipeCard recipe={recipe} />);
+    } = render(
+      <EditRecipeCard
+        recipe={recipe}
+        onDelete={() => {}}
+        onSave={() => {}}
+        onCancel={() => {}}
+      />
+    );
 
     expect(getByPlaceholderText(/name of recipe/i).value).toBe(recipe.title);
     expect(getByPlaceholderText(/how many does it serve\?/i).value).toBe(
@@ -53,7 +60,12 @@ describe('<EditRecipeCard />', () => {
   it('should call the onCancel callback when cancel button is clicked', () => {
     const onCancel = jest.fn();
     const { getByText } = render(
-      <EditRecipeCard recipe={recipe} onCancel={onCancel} />
+      <EditRecipeCard
+        recipe={recipe}
+        onCancel={onCancel}
+        onDelete={() => {}}
+        onSave={() => {}}
+      />
     );
 
     getByText(/cancel/i).click();
@@ -63,7 +75,12 @@ describe('<EditRecipeCard />', () => {
   it('should call the onDelete callback when delete button is clicked', () => {
     const onDelete = jest.fn();
     const { getByText } = render(
-      <EditRecipeCard recipe={recipe} onDelete={onDelete} />
+      <EditRecipeCard
+        recipe={recipe}
+        onDelete={onDelete}
+        onSave={() => {}}
+        onCancel={() => {}}
+      />
     );
 
     getByText(/delete/i).click();
@@ -74,7 +91,12 @@ describe('<EditRecipeCard />', () => {
   it('should call the onSave callback with the new recipe when save button is clicked', () => {
     const onSave = jest.fn();
     const { getByText, getAllByPlaceholderText, getByPlaceholderText } = render(
-      <EditRecipeCard recipe={recipe} onSave={onSave} />
+      <EditRecipeCard
+        recipe={recipe}
+        onSave={onSave}
+        onDelete={() => {}}
+        onCancel={() => {}}
+      />
     );
 
     // add new empty items to the list

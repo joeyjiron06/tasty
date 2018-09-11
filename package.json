@@ -20,9 +20,12 @@
     "test": "react-scripts test --env=jsdom",
     "eject": "react-scripts eject",
     "lint": "eslint src/**/*.js",
-    "prepush": "npm run lint"
+    "prepush": "npm run lint",
+    "storybook": "start-storybook -p 9001 -c .storybook"
   },
   "devDependencies": {
+    "@storybook/react": "^3.4.10",
+    "babel-core": "^6.26.3",
     "babel-eslint": "^8.2.6",
     "eslint": "^5.5.0",
     "eslint-plugin-react": "^7.11.1",

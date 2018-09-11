@@ -44,9 +44,9 @@ class BrowsePage extends Component {
     return (
       <div className={classes.browsePage}>
         <Typography
-          variant="display2"
+          variant='display2'
           gutterBottom
-          data-testid="browsepage-title"
+          data-testid='browsepage-title'
           className={classes.title}
         >
           Browse Recipes
@@ -60,7 +60,7 @@ class BrowsePage extends Component {
 
             if (isLoading) {
               return (
-                <CircularProgress data-testid="browsepage-loading-indicator" />
+                <CircularProgress data-testid='browsepage-loading-indicator' />
               );
             }
 
