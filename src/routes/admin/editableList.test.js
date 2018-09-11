@@ -42,11 +42,11 @@ describe('<EditableList />', () => {
 
   it('should remove an item when the "X" button is clicked', () => {
     const onChange = jest.fn();
-    const { getAllByAltText } = render(
+    const { getAllByTestId } = render(
       <EditableList items={['one', 'two', 'three']} onChange={onChange} />
     );
 
-    const removeButtonEls = getAllByAltText(/remove item/i);
+    const removeButtonEls = getAllByTestId('editableListRemoveButton');
     removeButtonEls[1].click();
 
     expect(onChange).toHaveBeenCalledTimes(1);

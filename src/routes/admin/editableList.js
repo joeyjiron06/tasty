@@ -1,5 +1,12 @@
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
+import {
+  TextField,
+  InputAdornment,
+  Icon,
+  IconButton,
+  Button
+} from '@material-ui/core';
 
 class EditableList extends Component {
   render() {
@@ -9,36 +16,48 @@ class EditableList extends Component {
       <div>
         {items.map((text, index) => (
           <div key={index}>
-            <input
+            <TextField
               placeholder={placeholder}
               value={text}
+              fullWidth={true}
+              gutterBottom={true}
               onChange={e => {
                 const { value } = e.target;
                 const newItems = [...items];
                 newItems[index] = value;
                 onChange(newItems);
               }}
-            />
-
-            <img
-              src='remove.png'
-              alt='remove item'
-              onClick={() => {
-                const newItems = items.filter((item, idx) => idx !== index);
-                onChange(newItems);
+              InputProps={{
+                endAdornment: (
+                  <InputAdornment position='end'>
+                    <IconButton
+                      data-testid='editableListRemoveButton'
+                      onClick={() => {
+                        const newItems = items.filter(
+                          (item, idx) => idx !== index
+                        );
+                        onChange(newItems);
+                      }}
+                    >
+                      <Icon>cancel</Icon>
+                    </IconButton>
+                  </InputAdornment>
+                )
               }}
             />
           </div>
         ))}
 
-        <button
+        <Button
+          variant='contained'
+          color='secondary'
           onClick={() => {
             const newItems = [...items, ''];
             onChange(newItems);
           }}
         >
           {buttonText}
-        </button>
+        </Button>
       </div>
     );
   }

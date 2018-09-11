@@ -59,7 +59,7 @@ describe('<EditRecipeCard />', () => {
 
   it('should call the onCancel callback when cancel button is clicked', () => {
     const onCancel = jest.fn();
-    const { getByText } = render(
+    const { getByTestId } = render(
       <EditRecipeCard
         recipe={recipe}
         onCancel={onCancel}
@@ -68,7 +68,7 @@ describe('<EditRecipeCard />', () => {
       />
     );
 
-    getByText(/cancel/i).click();
+    getByTestId('editRecipeCancelButton').click();
     expect(onCancel).toHaveBeenCalledTimes(1);
   });
 
@@ -153,11 +153,9 @@ describe('<EditRecipeCard />', () => {
     });
   });
 
-  // new recipe
-
-  // TODO move this to a separate component
-  // describe('tag', () => {
-  //   it('should add a tag to the list when "Add Tag" button is clicked');
-  //   it('should remove a tag when the "X" button is clicked');
-  // });
+  // TODO
+  // empty title should show error message
+  // invalid duration doesnt change input
+  // invalid serves doesnt change input
+  // save button disabled if no title or no image
 });

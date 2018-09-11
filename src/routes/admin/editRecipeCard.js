@@ -1,7 +1,7 @@
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 import { withStyles } from '@material-ui/core/styles';
-import { Typography, TextField } from '@material-ui/core';
+import { Typography, TextField, Button } from '@material-ui/core';
 import { RecipeType } from '../../utils/types';
 import EditableList from './editableList';
 
@@ -11,7 +11,7 @@ class EditRecipeCard extends Component {
   };
 
   render() {
-    const { onDelete, onCancel, onSave } = this.props;
+    const { onDelete, onCancel, onSave, classes } = this.props;
     const { recipe } = this.state;
 
     return (
@@ -27,21 +27,17 @@ class EditRecipeCard extends Component {
             this.setState({ recipe });
           }}
           placeholder='Name of Recipe'
+          label='Name'
           value={recipe.title}
+          fullWidth={true}
+          gutterBottom
         />
-
-        {/* <input
-          placeholder='Name of Recipe'
-          value={recipe.title}
-          onChange={e => {
-            const { value } = e.target;
-            recipe.title = value;
-            this.setState({ recipe });
-          }}
-        /> */}
-        <input
+        <TextField
+          label='Serves'
           placeholder='How many does it serve?'
           value={recipe.serves}
+          fullWidth={true}
+          gutterBottom
           onChange={e => {
             const { value } = e.target;
             const intVal = parseInt(value, 10);
@@ -52,9 +48,12 @@ class EditRecipeCard extends Component {
             this.setState({ recipe });
           }}
         />
-        <input
+        <TextField
+          label='Duration'
           placeholder='How long does it take?'
           value={recipe.duration}
+          fullWidth={true}
+          gutterBottom
           onChange={e => {
             const { value } = e.target;
             const intVal = parseInt(value, 10);
@@ -65,16 +64,23 @@ class EditRecipeCard extends Component {
             this.setState({ recipe });
           }}
         />
-        <input
+        <TextField
           placeholder='Image url'
           value={recipe.image}
+          fullWidth={true}
+          label='Image'
+          gutterBottom
           onChange={e => {
             const { value } = e.target;
             recipe.image = value;
             this.setState({ recipe });
           }}
         />
-        <img alt='recipe preview' src={recipe.image} />
+        <img
+          className={classes.imagePreview}
+          alt='recipe preview'
+          src={recipe.image}
+        />
 
         <EditableList
           items={recipe.tags}
@@ -107,15 +113,32 @@ class EditRecipeCard extends Component {
         />
 
         <div>
-          <button onClick={onCancel}>Cancel</button>
-          <button onClick={() => onDelete(recipe)}>Delete</button>
-          <button
+          <Button
+            variant='contained'
+            color='default'
+            onClick={onCancel}
+            data-testid='editRecipeCancelButton'
+          >
+            Cancel
+          </Button>
+
+          <Button
+            variant='contained'
+            color='secondary'
+            onClick={() => onDelete(recipe)}
+          >
+            Delete
+          </Button>
+
+          <Button
+            variant='contained'
+            color='secondary'
             onClick={() => {
               onSave(recipe);
             }}
           >
             Save
-          </button>
+          </Button>
         </div>
       </div>
     );
@@ -145,6 +168,11 @@ EditRecipeCard.propTypes = {
   onSave: PropTypes.func.isRequired
 };
 
-const styles = theme => ({});
+const styles = theme => ({
+  imagePreview: {
+    width: 200,
+    marginTop: 20
+  }
+});
 
 export default withStyles(styles)(EditRecipeCard);
