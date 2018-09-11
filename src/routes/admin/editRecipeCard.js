@@ -16,11 +16,12 @@ class EditRecipeCard extends Component {
 
     return (
       <div>
-        <Typography variant='display1' gutterBottom>
+        <Typography variant='display1' className={classes.title}>
           Edit Recipe
         </Typography>
 
         <TextField
+          className={classes.textField}
           onChange={e => {
             const { value } = e.target;
             recipe.title = value;
@@ -30,14 +31,13 @@ class EditRecipeCard extends Component {
           label='Name'
           value={recipe.title}
           fullWidth={true}
-          gutterBottom
         />
         <TextField
+          className={classes.textField}
           label='Serves'
           placeholder='How many does it serve?'
           value={recipe.serves}
           fullWidth={true}
-          gutterBottom
           onChange={e => {
             const { value } = e.target;
             const intVal = parseInt(value, 10);
@@ -49,11 +49,12 @@ class EditRecipeCard extends Component {
           }}
         />
         <TextField
+          className={classes.textField}
           label='Duration'
           placeholder='How long does it take?'
+          helperText='minutes'
           value={recipe.duration}
           fullWidth={true}
-          gutterBottom
           onChange={e => {
             const { value } = e.target;
             const intVal = parseInt(value, 10);
@@ -64,12 +65,13 @@ class EditRecipeCard extends Component {
             this.setState({ recipe });
           }}
         />
+
         <TextField
+          className={classes.textField}
           placeholder='Image url'
           value={recipe.image}
-          fullWidth={true}
           label='Image'
-          gutterBottom
+          fullWidth={true}
           onChange={e => {
             const { value } = e.target;
             recipe.image = value;
@@ -82,8 +84,12 @@ class EditRecipeCard extends Component {
           src={recipe.image}
         />
 
+        <Typography variant='title' className={classes.listHeading}>
+          Tags
+        </Typography>
         <EditableList
           items={recipe.tags}
+          textClassName={classes.textField}
           buttonText='ADD TAG'
           placeholder='Tag name'
           onChange={newTags => {
@@ -92,8 +98,12 @@ class EditRecipeCard extends Component {
           }}
         />
 
+        <Typography variant='title' className={classes.listHeading}>
+          Ingredients
+        </Typography>
         <EditableList
           items={recipe.ingredients}
+          textClassName={classes.textField}
           buttonText='ADD INGREDIENT'
           placeholder='Ingredient'
           onChange={newIngredients => {
@@ -102,8 +112,12 @@ class EditRecipeCard extends Component {
           }}
         />
 
+        <Typography variant='title' className={classes.listHeading}>
+          Directions
+        </Typography>
         <EditableList
           items={recipe.directions}
+          textClassName={classes.textField}
           buttonText='ADD DIRECTION'
           placeholder='Direction'
           onChange={newDirections => {
@@ -112,8 +126,9 @@ class EditRecipeCard extends Component {
           }}
         />
 
-        <div>
+        <div className={classes.actionButtonContainer}>
           <Button
+            className={classes.button}
             variant='contained'
             color='default'
             onClick={onCancel}
@@ -123,6 +138,7 @@ class EditRecipeCard extends Component {
           </Button>
 
           <Button
+            className={classes.button}
             variant='contained'
             color='secondary'
             onClick={() => onDelete(recipe)}
@@ -131,6 +147,7 @@ class EditRecipeCard extends Component {
           </Button>
 
           <Button
+            className={classes.button}
             variant='contained'
             color='secondary'
             onClick={() => {
@@ -169,9 +186,28 @@ EditRecipeCard.propTypes = {
 };
 
 const styles = theme => ({
+  title: {
+    marginBottom: 20
+  },
+  textField: {
+    display: 'block',
+    marginBottom: 26,
+    maxWidth: 400
+  },
   imagePreview: {
     width: 200,
-    marginTop: 20
+    borderRadius: 6,
+    maxWidth: '100%'
+  },
+  listHeading: {
+    marginTop: 40,
+    marginBottom: 20
+  },
+  actionButtonContainer: {
+    marginTop: 40
+  },
+  button: {
+    marginRight: 20
   }
 });
 

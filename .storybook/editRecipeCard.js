@@ -15,5 +15,8 @@ storiesOf('EditRecipeCard', module).add('Simple', () => (
       ingredients: ['1 lime', '1 cup of noodles'],
       directions: ['boil noodles', 'serve hot']
     }}
+    onCancel={() => {}}
+    onDelete={() => {}}
+    onSave={() => {}}
   />
 ));
