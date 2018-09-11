@@ -1,28 +1,132 @@
-import React from 'react';
+import React, { Component } from 'react';
+import PropTypes from 'prop-types';
+import { RecipeType } from '../../utils/types';
+import EditableList from './editableList';
 
-const EditRecipeCard = ({ recipe }) => (
-  <div>
-    <input placeholder='Name of Recipe' value={recipe.title} />
-    <input placeholder='How many does it serve?' value={recipe.serves} />
-    <input placeholder='How long does it take?' value={recipe.duration} />
-    <input placeholder='Image url' value={recipe.image} />
-    <img alt='recipe preview' src={recipe.image} />
+class EditRecipeCard extends Component {
+  state = {
+    recipe: null
+  };
 
-    {recipe.tags.map(tag => (
-      <input placeholder='Tag name' value={tag} />
-    ))}
-    <button>ADD TAG</button>
+  render() {
+    const { onDelete, onCancel, onSave } = this.props;
+    const { recipe } = this.state;
 
-    {recipe.ingredients.map(ingredient => (
-      <input placeholder='Ingredient' value={ingredient} />
-    ))}
-    <button>ADD INGREDIENT</button>
+    return (
+      <div>
+        <input
+          placeholder='Name of Recipe'
+          value={recipe.title}
+          onChange={e => {
+            const { value } = e.target;
+            recipe.title = value;
+            this.setState({ recipe });
+          }}
+        />
+        <input
+          placeholder='How many does it serve?'
+          value={recipe.serves}
+          onChange={e => {
+            const { value } = e.target;
+            const intVal = parseInt(value, 10);
+            if (isNaN(intVal)) {
+              return;
+            }
+            recipe.serves = intVal;
+            this.setState({ recipe });
+          }}
+        />
+        <input
+          placeholder='How long does it take?'
+          value={recipe.duration}
+          onChange={e => {
+            const { value } = e.target;
+            const intVal = parseInt(value, 10);
+            if (isNaN(intVal)) {
+              return;
+            }
+            recipe.duration = intVal;
+            this.setState({ recipe });
+          }}
+        />
+        <input
+          placeholder='Image url'
+          value={recipe.image}
+          onChange={e => {
+            const { value } = e.target;
+            recipe.image = value;
+            this.setState({ recipe });
+          }}
+        />
+        <img alt='recipe preview' src={recipe.image} />
 
-    {recipe.directions.map(direction => (
-      <input placeholder='Direction' value={direction} />
-    ))}
-    <button>ADD DIRECTION</button>
-  </div>
-);
+        <EditableList
+          items={recipe.tags}
+          buttonText='ADD TAG'
+          placeholder='Tag name'
+          onChange={newTags => {
+            recipe.tags = newTags;
+            this.setState({ recipe });
+          }}
+        />
+
+        <EditableList
+          items={recipe.ingredients}
+          buttonText='ADD INGREDIENT'
+          placeholder='Ingredient'
+          onChange={newIngredients => {
+            recipe.ingredients = newIngredients;
+            this.setState({ recipe });
+          }}
+        />
+
+        <EditableList
+          items={recipe.directions}
+          buttonText='ADD DIRECTION'
+          placeholder='Direction'
+          onChange={newDirections => {
+            recipe.directions = newDirections;
+            this.setState({ recipe });
+          }}
+        />
+
+        <div>
+          <button onClick={onCancel}>Cancel</button>
+          <button onClick={() => onDelete(recipe)}>Delete</button>
+          <button
+            onClick={() => {
+              onSave(recipe);
+            }}
+          >
+            Save
+          </button>
+        </div>
+      </div>
+    );
+  }
+}
+
+EditRecipeCard.getDerivedStateFromProps = ({ recipe }, state) => {
+  if (!state.recipe) {
+    // make a copy so we dont edit the original from props
+    return {
+      recipe: {
+        ...recipe,
+        tags: [...recipe.tags],
+        ingredients: [...recipe.ingredients],
+        directions: [...recipe.directions]
+      }
+    };
+  }
+
+  return null;
+};
+
+EditRecipeCard.propTypes = {
+  recipe: RecipeType.isRequired,
+  onDelete: PropTypes.func.isRequired,
+  onCancel: PropTypes.func.isRequired,
+  onSave: PropTypes.func.isRequired
+};
 
 export default EditRecipeCard;

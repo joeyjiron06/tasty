@@ -1,6 +1,6 @@
 import React from 'react';
 import EditRecipeCard from './editRecipeCard';
-import { render } from 'react-testing-library';
+import { render, fireEvent } from 'react-testing-library';
 
 describe('<EditRecipeCard />', () => {
   const recipe = {
@@ -49,12 +49,87 @@ describe('<EditRecipeCard />', () => {
       expect(el.value).toBe(recipe.directions[index])
     );
   });
-  it('should not render values when recipe values are empty');
-  it('should call the onCancel callback when cancel button is clicked');
-  it('should call the onDelete callback when delete button is clicked');
-  it(
-    'should call the onSave callback with the new recipe when save button is clicked'
-  );
+
+  it('should call the onCancel callback when cancel button is clicked', () => {
+    const onCancel = jest.fn();
+    const { getByText } = render(
+      <EditRecipeCard recipe={recipe} onCancel={onCancel} />
+    );
+
+    getByText(/cancel/i).click();
+    expect(onCancel).toHaveBeenCalledTimes(1);
+  });
+
+  it('should call the onDelete callback when delete button is clicked', () => {
+    const onDelete = jest.fn();
+    const { getByText } = render(
+      <EditRecipeCard recipe={recipe} onDelete={onDelete} />
+    );
+
+    getByText(/delete/i).click();
+    expect(onDelete).toHaveBeenCalledTimes(1);
+    expect(onDelete).toHaveBeenCalledWith(recipe);
+  });
+
+  it('should call the onSave callback with the new recipe when save button is clicked', () => {
+    const onSave = jest.fn();
+    const { getByText, getAllByPlaceholderText, getByPlaceholderText } = render(
+      <EditRecipeCard recipe={recipe} onSave={onSave} />
+    );
+
+    // add new empty items to the list
+    getByText(/add tag/i).click();
+    getByText(/add ingredient/i).click();
+    getByText(/add direction/i).click();
+
+    // change the input fields
+    fireEvent.change(getByPlaceholderText(/name of recipe/i), {
+      target: { value: 'Test Title' }
+    });
+    fireEvent.change(getByPlaceholderText(/How many does it serve\?/i), {
+      target: { value: '42' }
+    });
+    fireEvent.change(getByPlaceholderText(/How long does it take\?/i), {
+      target: { value: '66' }
+    });
+    fireEvent.change(getByPlaceholderText(/Image url/i), {
+      target: { value: 'http://new.image.com' }
+    });
+    fireEvent.change(getAllByPlaceholderText(/tag name/i)[recipe.tags.length], {
+      target: { value: 'New Tag' }
+    });
+    fireEvent.change(
+      getAllByPlaceholderText(/ingredient/i)[recipe.ingredients.length],
+      {
+        target: { value: 'New Ingredient' }
+      }
+    );
+    fireEvent.change(
+      getAllByPlaceholderText(/direction/i)[recipe.directions.length],
+      {
+        target: { value: 'New Direction' }
+      }
+    );
+
+    getByText(/save/i).click();
+
+    expect(onSave).toHaveBeenCalledTimes(1);
+    expect(onSave).toHaveBeenCalledWith({
+      title: 'Test Title',
+      serves: 42,
+      duration: 66,
+      image: 'http://new.image.com',
+      tags: expect.arrayContaining([...recipe.tags, 'New Tag']),
+      ingredients: expect.arrayContaining([
+        ...recipe.ingredients,
+        'New Ingredient'
+      ]),
+      directions: expect.arrayContaining([
+        ...recipe.directions,
+        'New Direction'
+      ])
+    });
+  });
 
   // new recipe
 

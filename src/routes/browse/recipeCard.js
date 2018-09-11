@@ -6,6 +6,7 @@ import {
   MuiThemeProvider
 } from '@material-ui/core/styles';
 import { Typography, Card, CardMedia, CardContent } from '@material-ui/core';
+import { RecipeType } from '../../utils/types';
 
 const theme = createMuiTheme({});
 
@@ -15,24 +16,24 @@ const RecipeCard = ({ recipe, className, onClick, classes = {} }) => (
     <Card
       className={`${classes.card} ${className || ''}`}
       onClick={onClick}
-      data-testid="recipecard"
+      data-testid='recipecard'
     >
       <CardMedia
         className={classes.media}
         image={recipe.image || ''}
         title={recipe.title}
-        data-testid="recipecard-image"
+        data-testid='recipecard-image'
       />
       <CardContent>
         <Typography
           gutterBottom
-          variant="title"
+          variant='title'
           noWrap={true}
-          data-testid="recipecard-title"
+          data-testid='recipecard-title'
         >
           {recipe.title}
         </Typography>
-        <Typography component="p" noWrap={true} data-testid="recipecard-tags">
+        <Typography component='p' noWrap={true} data-testid='recipecard-tags'>
           {(recipe.tags || []).join(' · ')}
         </Typography>
       </CardContent>
@@ -41,11 +42,7 @@ const RecipeCard = ({ recipe, className, onClick, classes = {} }) => (
 );
 
 RecipeCard.propTypes = {
-  recipe: PropTypes.shape({
-    image: PropTypes.string.isRequired,
-    title: PropTypes.string.isRequired,
-    tags: PropTypes.arrayOf(PropTypes.string).isRequired
-  }).isRequired,
+  recipe: RecipeType.isRequired,
   className: PropTypes.string,
   onClick: PropTypes.func
 };
