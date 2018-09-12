@@ -28,12 +28,6 @@ import * as logger from '../../utils/logger';
 import EditRecipeCard from './editRecipeCard';
 import RecipePreviewCard from './recipePreviewCard';
 
-const theme = createMuiTheme({
-  palette: {
-    primary: blue
-  }
-});
-
 class AdminPage extends Component {
   state = {
     user: null,
@@ -274,6 +268,7 @@ class AdminPage extends Component {
         <Typography variant='title' gutterBottom className={classes.listTitle}>
           Trash
         </Typography>
+
         {(() => {
           if (!trash) {
             return;
