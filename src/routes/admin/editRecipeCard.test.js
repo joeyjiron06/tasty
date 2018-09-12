@@ -153,6 +153,26 @@ describe('<EditRecipeCard />', () => {
     });
   });
 
+  it('should disable the save button when no title, no image, no ingredients, no serves, no duration, or no directions', () => {
+    const { getByText } = render(
+      <EditRecipeCard
+        recipe={{
+          title: '',
+          image: '',
+          serves: 0,
+          duration: 0,
+          tags: [],
+          ingredients: [],
+          directions: []
+        }}
+        onSave={() => {}}
+        onDelete={() => {}}
+        onCancel={() => {}}
+      />
+    );
+
+    expect(getByText(/save/i)).toBeDisabled();
+  });
   // TODO
   // empty title should show error message
   // invalid duration doesnt change input

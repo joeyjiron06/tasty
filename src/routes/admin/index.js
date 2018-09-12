@@ -1,6 +1,15 @@
 import React, { Component } from 'react';
 import { withStyles } from '@material-ui/core/styles';
-import { Typography, Button, CircularProgress } from '@material-ui/core';
+import {
+  Typography,
+  Button,
+  CircularProgress,
+  Dialog,
+  DialogActions,
+  DialogContentText,
+  DialogTitle,
+  DialogContent
+} from '@material-ui/core';
 import {
   addRecipe,
   authUser,
@@ -9,7 +18,8 @@ import {
   deleteFromTrash,
   updateRecipe,
   fetchRecipes,
-  deleteRecipe
+  deleteRecipe,
+  moveRecipeToTrash
 } from '../../api/recipes';
 import * as logger from '../../utils/logger';
 import EditRecipeCard from './editRecipeCard';
@@ -134,6 +144,7 @@ class AdminPage extends Component {
   };
 
   handleEditRecipe = recipe => {
+    logger.log('edit recipe', recipe);
     this.setState({
       editRecipe: recipe
     });
@@ -141,7 +152,14 @@ class AdminPage extends Component {
 
   render() {
     const { classes } = this.props;
-    const { user, trash, recipes, isLoading, editRecipe } = this.state;
+    const {
+      user,
+      trash,
+      recipes,
+      isLoading,
+      editRecipe,
+      onDeleteRecipe
+    } = this.state;
 
     if (!user) {
       return (
@@ -194,6 +212,7 @@ class AdminPage extends Component {
               } else {
                 updateRecipe(recipe.id, recipe);
               }
+              this.loadRecipes();
               this.setState({ editRecipe: null });
             }}
             onDelete={() => {}}
@@ -239,9 +258,14 @@ class AdminPage extends Component {
                 <RecipePreviewCard
                   key={recipe.id}
                   recipe={recipe}
-                  onDelete={async () => {
-                    await deleteRecipe(recipe.id);
-                    await this.loadRecipes();
+                  onDelete={() => {
+                    this.setState({
+                      onDeleteRecipe: async () => {
+                        await moveRecipeToTrash(recipe.id);
+                        await deleteRecipe(recipe.id);
+                        await this.loadRecipes();
+                      }
+                    });
                   }}
                   onEdit={() => {
                     this.handleEditRecipe(recipe);
@@ -283,9 +307,13 @@ class AdminPage extends Component {
                 <RecipePreviewCard
                   key={recipe.id}
                   recipe={recipe}
-                  onDelete={async () => {
-                    await deleteFromTrash(recipe.id);
-                    await this.loadTrash();
+                  onDelete={() => {
+                    this.setState({
+                      onDeleteRecipe: async () => {
+                        await deleteFromTrash(recipe.id);
+                        await this.loadTrash();
+                      }
+                    });
                   }}
                   onEdit={() => {
                     this.handleEditRecipe(recipe);
@@ -296,6 +324,40 @@ class AdminPage extends Component {
             </div>
           );
         })()}
+
+        {onDeleteRecipe && (
+          <Dialog
+            open={true}
+            onClose={() => {
+              this.setState({ onDeleteRecipe: null });
+            }}
+          >
+            <DialogTitle>Delete Recipe?</DialogTitle>
+            <DialogContent>
+              <DialogContentText>
+                Are you sure you want to delete this recipe?
+              </DialogContentText>
+
+              <DialogActions>
+                <Button
+                  onClick={() => {
+                    this.setState({ onDeleteRecipe: null });
+                  }}
+                >
+                  Cancel
+                </Button>
+                <Button
+                  onClick={async () => {
+                    await onDeleteRecipe();
+                    this.setState({ onDeleteRecipe: null });
+                  }}
+                >
+                  Delete Recipe
+                </Button>
+              </DialogActions>
+            </DialogContent>
+          </Dialog>
+        )}
       </div>
     );
   }

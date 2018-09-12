@@ -25,7 +25,7 @@ export const disableAll = () => {
 };
 
 function setAllEnabled(value) {
-  log.enable = value;
-  error.enable = value;
-  warn.enable = value;
+  log.enabled = value;
+  error.enabled = value;
+  warn.enabled = value;
 }

@@ -28,6 +28,14 @@ class EditRecipeCard extends Component {
   render() {
     const { onDelete, onCancel, onSave, classes } = this.props;
     const { recipe } = this.state;
+    const saveButtonEnabled =
+      recipe.title &&
+      recipe.image &&
+      recipe.serves > 0 &&
+      recipe.duration > 0 &&
+      recipe.tags[0] &&
+      recipe.ingredients[0] &&
+      recipe.directions[0];
 
     return (
       <MuiThemeProvider theme={theme}>
@@ -172,6 +180,7 @@ class EditRecipeCard extends Component {
               className={classes.button}
               variant='contained'
               color='secondary'
+              disabled={!saveButtonEnabled}
               onClick={() => {
                 onSave(recipe);
               }}

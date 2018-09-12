@@ -130,17 +130,12 @@ export async function deleteRecipe(recipeId) {
  * Creates a new recipe in the database.
  * @return {string} the new recipe id
  */
-export async function addRecipe() {
+export async function addRecipe(recipe) {
   const recipeSnapshot = await database()
     .ref('recipes')
     .push({
-      dateAdded: database.ServerValue.TIMESTAMP,
-      duration: 0,
-      tags: [],
-      ingredients: [],
-      directions: [],
-      title: '',
-      image: ''
+      ...recipe,
+      dateAdded: database.ServerValue.TIMESTAMP
     });
 
   return recipeSnapshot.key;
