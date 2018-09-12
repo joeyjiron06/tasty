@@ -2,7 +2,8 @@
   "extends": "react-app",
   "rules": {
     "quotes": ["error", "single"],
-    "jsx-quotes": ["error", "prefer-single"]
+    "jsx-quotes": ["error", "prefer-single"],
+    "no-unused-vars": ["error"]
   },
   "env": {
     "browser": true,

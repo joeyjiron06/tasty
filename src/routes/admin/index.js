@@ -1,19 +1,6 @@
 import React, { Component } from 'react';
-import {
-  withStyles,
-  createMuiTheme,
-  MuiThemeProvider
-} from '@material-ui/core/styles';
-import {
-  Typography,
-  Button,
-  CircularProgress,
-  Card,
-  CardActions,
-  CardMedia,
-  CardContent
-} from '@material-ui/core';
-import { blue, red } from '@material-ui/core/colors';
+import { withStyles } from '@material-ui/core/styles';
+import { Typography, Button, CircularProgress } from '@material-ui/core';
 import {
   addRecipe,
   authUser,

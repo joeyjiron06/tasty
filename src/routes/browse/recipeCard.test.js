@@ -41,7 +41,7 @@ describe('<RecipeCard />', () => {
 
     it('should add className to card', () => {
       const { getByTestId } = render(
-        <RecipeCard recipe={recipe} className="bestClassEver" />
+        <RecipeCard recipe={recipe} className='bestClassEver' />
       );
 
       expect(getByTestId('recipecard')).toHaveClass('bestClassEver');
