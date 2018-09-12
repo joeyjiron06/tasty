@@ -35,7 +35,7 @@ class RecipePage extends Component {
     if (isError) {
       return (
         <div className={classes.page}>
-          <Typography variant="display1" className={classes.title}>
+          <Typography variant='display1' className={classes.title}>
             Recipe does not exist
           </Typography>
         </div>
@@ -45,7 +45,7 @@ class RecipePage extends Component {
     if (isLoading) {
       return (
         <div className={classes.page}>
-          <CircularProgress data-testid="recipepage-loading-indicator" />
+          <CircularProgress data-testid='recipepage-loading-indicator' />
         </div>
       );
     }
@@ -54,9 +54,9 @@ class RecipePage extends Component {
       <div className={classes.page}>
         <div className={classes.infoContainer}>
           <Typography
-            variant="display3"
+            variant='display3'
             className={classes.title}
-            data-testid="recipepage-title"
+            data-testid='recipepage-title'
           >
             {recipe.title}
           </Typography>
@@ -67,7 +67,7 @@ class RecipePage extends Component {
             <div className={classes.timeAndServicesContainer}>
               <div className={classes.timeContainer}>
                 <Icon className={classes.icon}>access_time</Icon>
-                <div data-testid="recipepage-duration">{`${
+                <div data-testid='recipepage-duration'>{`${
                   recipe.duration
                 } mins`}</div>
               </div>
@@ -76,7 +76,7 @@ class RecipePage extends Component {
                 <Icon className={classes.icon}>people_outline</Icon>
                 <Typography
                   className={classes.servingsText}
-                  data-testid="recipepage-serves"
+                  data-testid='recipepage-serves'
                 >
                   {recipe.serves}
                 </Typography>
@@ -88,7 +88,7 @@ class RecipePage extends Component {
                 <div
                   key={tag}
                   className={classes.chip}
-                  data-testid="recipepage-tag"
+                  data-testid='recipepage-tag'
                 >
                   {tag}
                 </div>
@@ -98,7 +98,7 @@ class RecipePage extends Component {
 
           <div className={classes.contentsContainer}>
             <div className={classes.ingredients}>
-              <Typography variant="title" gutterBottom>
+              <Typography variant='title' gutterBottom>
                 Ingredients
               </Typography>
               <div>
@@ -106,7 +106,7 @@ class RecipePage extends Component {
                   <Typography
                     key={ingredient}
                     className={classes.ingredient}
-                    data-testid="recipepage-ingredient"
+                    data-testid='recipepage-ingredient'
                   >
                     {ingredient}
                   </Typography>
@@ -115,7 +115,7 @@ class RecipePage extends Component {
             </div>
 
             <div className={classes.directions}>
-              <Typography variant="title" gutterBottom>
+              <Typography variant='title' gutterBottom>
                 Directions
               </Typography>
               <div className={classes.directionsList}>
@@ -123,7 +123,7 @@ class RecipePage extends Component {
                   <div
                     key={step}
                     className={classes.directionStep}
-                    data-testid="recipepage-direction"
+                    data-testid='recipepage-direction'
                   >
                     <Typography className={classes.directionNumber}>
                       {index + 1}
@@ -142,8 +142,8 @@ class RecipePage extends Component {
           <img
             className={classes.image}
             src={recipe.image}
-            alt="recipe"
-            data-testid="recipepage-image"
+            alt='recipe'
+            data-testid='recipepage-image'
           />
         </div>
       </div>

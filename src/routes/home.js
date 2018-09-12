@@ -7,15 +7,15 @@ const HomePage = ({ classes }) => (
     <div className={classes.bgImageContainer}>
       <img
         className={classes.bgImage}
-        src="img/home-bg-1.jpg"
-        alt="background"
+        src='img/home-bg-1.jpg'
+        alt='background'
       />
       <div className={classes.bgImageOverlay} />
     </div>
 
     <div className={classes.titleContainer}>
-      <Typography variant="display4">Tasty</Typography>
-      <Typography variant="subheading">Recipes made easy</Typography>
+      <Typography variant='display4'>Tasty</Typography>
+      <Typography variant='subheading'>Recipes made easy</Typography>
     </div>
   </div>
 );

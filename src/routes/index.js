@@ -10,10 +10,10 @@ export default () => (
   <Router>
     <div>
       <Toolbar />
-      <Route exact path="/" component={HomePage} />
-      <Route exact path="/recipe/:id" component={RecipePage} />
-      <Route exact path="/browse" component={BrowsePage} />
-      <Route exact path="/admin" component={AdminPage} />
+      <Route exact path='/' component={HomePage} />
+      <Route exact path='/recipe/:id' component={RecipePage} />
+      <Route exact path='/browse' component={BrowsePage} />
+      <Route exact path='/admin' component={AdminPage} />
     </div>
   </Router>
 );
