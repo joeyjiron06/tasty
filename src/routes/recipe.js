@@ -154,12 +154,11 @@ class RecipePage extends Component {
 const styles = theme => ({
   page: {
     display: 'flex',
-    position: 'relative',
-    zIndex: 1,
-    [theme.breakpoints.up('sm')]: {
-      minHeight: '100vh'
-    },
-    color: 'white'
+    alignItems: 'flex-start',
+    color: 'white',
+    [theme.breakpoints.down('sm')]: {
+      flexDirection: 'column'
+    }
   },
 
   infoContainer: {
@@ -167,9 +166,7 @@ const styles = theme => ({
     padding: 50,
     zIndex: 1,
     [theme.breakpoints.down('sm')]: {
-      background: 'rgba(0,0,0,0.5)',
-      overflow: 'scroll',
-      height: '100vh',
+      order: 10,
       boxSizing: 'border-box'
     }
   },
@@ -267,13 +264,11 @@ const styles = theme => ({
     height: '100%',
     position: 'relative',
     [theme.breakpoints.down('sm')]: {
-      position: 'absolute',
-      top: 0,
-      left: 0,
+      height: 0,
       width: '100%',
-      background: 'rgba(0,0,0,0.7)',
       padding: 0,
-      zIndex: -1
+      paddingTop: '56.25%', // 16:9 aspect ratio
+      flex: 0
     }
   },
   image: {
@@ -283,17 +278,11 @@ const styles = theme => ({
     height: '100%',
     display: 'block',
     borderRadius: 10,
+    maxHeight: '100vh',
     [theme.breakpoints.down('sm')]: {
-      borderRadius: 0
-    }
-  },
-  imageUrl: {
-    position: 'absolute',
-    left: 40,
-    bottom: 0,
-    zIndex: 20,
-    [theme.breakpoints.down('sm')]: {
-      bottom: 20
+      borderRadius: 0,
+      position: 'absolute',
+      top: 0
     }
   }
 });

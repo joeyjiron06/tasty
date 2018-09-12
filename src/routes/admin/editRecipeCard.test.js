@@ -161,9 +161,9 @@ describe('<EditRecipeCard />', () => {
           image: '',
           serves: 0,
           duration: 0,
-          tags: [],
-          ingredients: [],
-          directions: []
+          tags: [''],
+          ingredients: [''],
+          directions: ['']
         }}
         onSave={() => {}}
         onDelete={() => {}}
